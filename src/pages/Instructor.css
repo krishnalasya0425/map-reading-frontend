@@ -1,0 +1,156 @@
+/* Page layout */
+.instructor-page {
+  display: flex;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background-color: #f0f4f8;
+}
+
+/* Sidebar */
+.instructor-sidebar {
+  width: 220px;
+  background-color: #96b5f7; /* blue-600 */
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.instructor-sidebar h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.instructor-sidebar button {
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s;
+}
+
+.instructor-sidebar button.active,
+.instructor-sidebar button:hover {
+  background-color: #1e40af; /* blue-800 */
+}
+
+.instructor-sidebar .logout-btn {
+  margin-top: auto;
+  background-color: #dc2626;
+}
+
+.instructor-sidebar .logout-btn:hover {
+  background-color: #b91c1c;
+}
+
+/* Main content */
+.instructor-main {
+  flex: 1;
+  padding: 2rem;
+  overflow: auto;
+}
+
+/* Headings */
+.instructor-main h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1e3a8a;
+  margin-bottom: 1rem;
+}
+
+/* Card */
+.instructor-card {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Table */
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.student-table th,
+.student-table td {
+  border: 1px solid #d1d5db;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.student-table th {
+  background-color: #f3f4f6;
+}
+
+/* Approve button */
+.btn-approve {
+  background-color: #16a34a; /* green-600 */
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-approve:hover {
+  background-color: #15803d; /* green-700 */
+}
+
+/* Edit/Delete buttons */
+.btn-edit {
+  background-color: #f59e0b;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-edit:hover {
+  background-color: #d97706;
+}
+
+.btn-delete {
+  background-color: #dc2626;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-delete:hover {
+  background-color: #b91c1c;
+}
+
+/* Modal overlay & card (already exists) */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  width: 400px;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

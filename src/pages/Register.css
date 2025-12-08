@@ -1,0 +1,113 @@
+/* Center full page */
+.register-page {
+  background-color: #eff6ff; /* blue-50 */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: sans-serif;
+}
+
+/* Card container */
+.register-card {
+  width: 100%;
+  max-width: 400px; /* smaller width for center card */
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Form heading */
+.register-card h2 {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700;
+  color: #1d4ed8; /* blue-700 */
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Form subtext */
+.register-card p {
+  text-align: center;
+  color: #6b7280; /* gray-500 */
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+/* Form inputs */
+.register-card input,
+.register-card select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #111827;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.register-card input:focus,
+.register-card select:focus {
+  border-color: #2563eb; /* blue-600 */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3); /* focus ring */
+}
+
+/* Two-column grid */
+.register-card form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.register-card form .col-span-2 {
+  grid-column: span 2;
+}
+
+/* Submit button */
+.register-card button {
+  width: 100%;
+  background-color: #1d4ed8; /* blue-700 */
+  color: white;
+  padding: 0.75rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.register-card button:hover {
+  background-color: #1e40af; /* blue-800 */
+}
+
+/* Message text */
+.register-card .msg {
+  color: #dc2626; /* red-600 */
+  text-align: center;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* Footer link */
+.register-card .footer-link {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280; /* gray-500 */
+}
+
+.register-card .footer-link a {
+  color: #2563eb; /* blue-600 */
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.register-card .footer-link a:hover {
+  text-decoration: underline;
+}

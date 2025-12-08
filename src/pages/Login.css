@@ -1,0 +1,110 @@
+/* Center full page */
+.login-page {
+  background-color: #f9fafb; /* bg-gray-50 */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: sans-serif;
+}
+
+/* Card container */
+.login-card {
+  width: 100%;
+  max-width: 400px; /* same as max-w-md */
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Logo link */
+.login-logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827; /* gray-900 */
+  margin-bottom: 1rem;
+  text-decoration: none;
+}
+
+.login-logo img {
+  width: 32px;
+  height: 32px;
+  margin-right: 0.5rem;
+}
+
+/* Form heading */
+.login-card h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Form inputs */
+.login-card input {
+  width: 100%;
+  padding: 0.625rem;
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #111827;
+  outline: none;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.login-card input:focus {
+  border-color: #2563eb; /* blue-600 */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+/* Submit button */
+.login-card button {
+  width: 100%;
+  background-color: #2563eb; /* blue-600 */
+  color: white;
+  padding: 0.625rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.login-card button:hover {
+  background-color: #1d4ed8; /* blue-700 */
+}
+
+/* Message text */
+.login-card .msg {
+  color: #dc2626; /* red-600 */
+  text-align: center;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* Footer text */
+.login-card p {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280; /* gray-500 */
+}
+
+.login-card p a {
+  color: #2563eb; /* blue-600 */
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.login-card p a:hover {
+  text-decoration: underline;
+}
