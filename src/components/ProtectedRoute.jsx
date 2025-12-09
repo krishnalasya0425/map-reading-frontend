@@ -1,12 +1,17 @@
+// components/ProtectedRoute.jsx
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-export default function ProtectedRoute({ role, children }) {
-  const token = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role"); // optionally save role on login
+export default function ProtectedRoute({ children, role }) {
+  const { user } = useAuth();
 
-  if (!token) return <Navigate to="/login" />;
+  // No user → redirect to login
+  if (!user) return <Navigate to="/login" replace />;
 
-  if (role && role !== userRole) return <Navigate to="/login" />;
+  // Wrong role → block access
+  if (role && user.role !== role) {
+    return <Navigate to={`/${user.role}`} replace />;
+  }
 
   return children;
 }

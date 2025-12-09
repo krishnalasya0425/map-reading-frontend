@@ -9,15 +9,17 @@ export function AuthProvider({ children }) {
 
   const login = async (armyId, password) => {
     const res = await api.post("/auth/login", { armyId, password });
+
     const userData = {
       id: res.data.id,
       role: res.data.role,
       batchNo: res.data.batchNo,
       token: res.data.token,
     };
+
     setUser(userData);
-    // optionally save token in localStorage
     localStorage.setItem("token", res.data.token);
+
     return userData;
   };
 

@@ -82,22 +82,20 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMsg("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setMsg("");
 
-    try {
-      const user = await login(armyId, password);
+  try {
+    const user = await login(armyId, password);
 
-      if (user.role === "admin") navigate("/admin");
-      else if (user.role === "instructor") navigate("/instructor");
-      else if (user.role === "student") navigate("/student");
-      else setMsg("Unknown role");
-    } catch (err) {
-      console.error(err);
-      setMsg(err.response?.data?.message || "Login failed");
-    }
-  };
+    if (user.role === "admin") navigate("/admin");
+    else if (user.role === "instructor") navigate("/instructor");
+    else navigate("/student");
+  } catch (err) {
+    setMsg(err.response?.data?.message || "Login failed");
+  }
+};
 
   return (
     <section className="login-page">
@@ -115,18 +113,22 @@ export default function Login() {
         <form onSubmit={handleSubmit}>
           <input
             type="text"
+            name="army_id"
             placeholder="Army ID"
             value={armyId}
             onChange={(e) => setArmyId(e.target.value)}
             required
           />
+
           <input
             type="password"
+            name="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+
 
           <button type="submit">Login</button>
         </form>
