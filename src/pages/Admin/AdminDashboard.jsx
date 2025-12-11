@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import api from "../api/axios";
-import "./Admin.css";
+import api from "../../entities/axios";
+import React from "react";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("students");

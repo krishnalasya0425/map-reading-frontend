@@ -14,8 +14,8 @@ const Classes = () => {
   const [editClassId, setEditClassId] = useState(null);
   const [editClassName, setEditClassName] = useState("");
 
-  const role = "adm"
-  const id ='1'
+  const role = localStorage.getItem("role")
+  const id = localStorage.getItem("id")
 
   // Load classes
   useEffect(() => {

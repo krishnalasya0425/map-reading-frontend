@@ -17,7 +17,7 @@ const routesConfig = [
   { path: '/forgotpassword', element: <ForgotPassword /> },
   { path: '/resetpassword', element: <ResetPassword /> },
 
-  { path: '/Dashboard', element: <AdminDashboard />, roles: ['admin', 'Instructor'] },
+  { path: '/dashboard', element: <AdminDashboard />, roles: ['admin', 'Instructor'] },
   { path: '/classes', element: <Classes/>, roles: ['admin', 'Instructor'] },
   { path: '/:classId/docs', element: <Docs/>, roles: ['admin', 'Instructor'] },
   { path: '/test', element: <Test/>, roles: ['Student']},
