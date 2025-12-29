@@ -1,17 +1,23 @@
 @import "tailwindcss";
 
 .input {
-  @apply w-full border rounded px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-300 outline-none;
+  @apply w-full border rounded px-3 py-2 bg-gray-50 outline-none;
 }
 
 .input-box {
-  @apply w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 
-         border border-white/30 focus:border-blue-400 outline-none backdrop-blur-md;
+  @apply w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/30 outline-none backdrop-blur-md;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .animate-fadeIn {
@@ -20,11 +26,28 @@
 
 
 .input-field {
-  @apply w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none;
+  @apply w-full p-3 border border-gray-300 rounded-lg focus:outline-none;
 }
 
 .blue-btn {
-  @apply w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all;
+  @apply w-full text-white py-3 rounded-lg font-semibold transition-all;
+  background-color: #074F06;
 }
 
+.blue-btn:hover {
+  background-color: #053d05;
+}
 
+/* Navbar link styles */
+.nav-link-inactive {
+  color: white;
+}
+
+.nav-link-inactive:hover {
+  background-color: #D5F2D5 !important;
+  color: #074F06 !important;
+}
+
+.nav-link-active {
+  color: #074F06 !important;
+}

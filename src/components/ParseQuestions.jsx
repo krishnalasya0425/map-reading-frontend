@@ -20,7 +20,7 @@ export default function ParseQuestions() {
     }
   };
 
-   const [selected, setSelected] = useState(() => questions.map(q => q.id));
+  const [selected, setSelected] = useState(() => questions.map(q => q.id));
 
   const toggleSelection = (id) => {
     setSelected(prev =>
@@ -32,41 +32,41 @@ export default function ParseQuestions() {
 
 
   const handleSubmit = async () => {
-  try {
-    if (selected.length === 0) {
-      alert("Select at least one question!");
-      return;
+    try {
+      if (selected.length === 0) {
+        alert("Select at least one question!");
+        return;
+      }
+
+      const selectedQuestions = questions.filter(q => selected.includes(q.id));
+      const payload = buildPayload(selectedQuestions);
+
+      const data = await test.addQuestions(1, payload);
+
+      alert("Questions inserted successfully 🚀");
+      console.log("Inserted:", data);
+
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred!");
     }
-
-    const selectedQuestions = questions.filter(q => selected.includes(q.id));
-    const payload = buildPayload(selectedQuestions);
-
-    const data = await test.addQuestions(1, payload); 
-
-    alert("Questions inserted successfully 🚀");
-    console.log("Inserted:", data);
-
-  } catch (err) {
-    console.error(err);
-    alert("An error occurred!");
-  }
-};
+  };
 
 
-  
-  
-function buildPayload(questions) {
+
+
+  function buildPayload(questions) {
     console.log("Building payload for questions:", questions);
-  return questions.map(q => ({
-    question_text: q.text,
-    type: q.type,
-    answer: q.answer,
-    options: q.options?.map((opt, idx) => ({
-      label: String.fromCharCode(65 + idx), // A/B/C/D
-      text: opt
-    }))
-  }));
-}
+    return questions.map(q => ({
+      question_text: q.text,
+      type: q.type,
+      answer: q.answer,
+      options: q.options?.map((opt, idx) => ({
+        label: String.fromCharCode(65 + idx), // A/B/C/D
+        text: opt
+      }))
+    }));
+  }
 
 
 
@@ -82,22 +82,23 @@ function buildPayload(questions) {
       />
 
 
-    <h2 className="text-2xl font-semibold">Generated Questions</h2>
+      <h2 className="text-2xl font-semibold">Generated Questions</h2>
 
-      {questions.map((q, idx)=> (
+      {questions.map((q, idx) => (
         <div
           key={q.id}
-          className="border p-4 shadow-sm rounded-md bg-white"
+          className="border p-4 shadow-sm rounded-md"
+          style={{ backgroundColor: '#9FCF9F' }}
         >
           <div className="flex justify-between">
-              <input
+            <input
               type="checkbox"
               checked={selected.includes(q.id)}
               onChange={() => toggleSelection(q.id)}
             />
-           <span> ( {idx} )</span>
+            <span> ( {idx} )</span>
             <span className="font-medium">{q.text}</span>
-          
+
           </div>
 
           {/* TAGS */}
@@ -108,15 +109,15 @@ function buildPayload(questions) {
           <div className="mt-2">
             {q.type !== "tf" && (
               <ul>
-  {q.options?.map((opt, idx) => {
-    const letter = String.fromCharCode(65 + idx); // 65 = 'A'
-    return (
-      <li key={idx}>
-        <b>{letter}.</b> {opt}
-      </li>
-    );
-  })}
-</ul>
+                {q.options?.map((opt, idx) => {
+                  const letter = String.fromCharCode(65 + idx); // 65 = 'A'
+                  return (
+                    <li key={idx}>
+                      <b>{letter}.</b> {opt}
+                    </li>
+                  );
+                })}
+              </ul>
 
             )}
           </div>

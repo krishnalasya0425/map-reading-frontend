@@ -63,7 +63,8 @@ const TestQuestions = () => {
             return (
               <div
                 key={q.id}
-                className="p-4 bg-white shadow rounded-lg border"
+                className="p-4 shadow rounded-lg border"
+                style={{ backgroundColor: '#9FCF9F' }}
               >
                 <h3 className="font-bold text-lg">{q.question_text}</h3>
 
@@ -217,11 +218,10 @@ const TestQuestions = () => {
             <button
               disabled={currentIndex === 0}
               onClick={() => setCurrentIndex(currentIndex - 1)}
-              className={`px-4 py-2 rounded-lg ${
-                currentIndex === 0
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-gray-700 text-white hover:bg-gray-800"
-              }`}
+              className={`px-4 py-2 rounded-lg ${currentIndex === 0
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-gray-700 text-white hover:bg-gray-800"
+                }`}
             >
               Previous
             </button>

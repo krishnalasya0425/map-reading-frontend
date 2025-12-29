@@ -27,22 +27,22 @@ export const classAPI = {
   // =======================
   // CLASSES
   // =======================
-   getAllClasses(id = null, role = null) {
-  let url = `${API_BASE_URL}`;
- 
-  if (role === "Student") {
-    url += `/assigned?id=${id}`;
-  } 
-  else if (id) {
-    url += `?id=${id}`;
-  }
+  getAllClasses(id = null, role = null) {
+    let url = `${API_BASE_URL}`;
 
-  return apiRequest(url, "GET");
-},
+    if (role === "Student") {
+      url += `/assigned?id=${id}`;
+    }
+    else if (id) {
+      url += `?id=${id}`;
+    }
+
+    return apiRequest(url, "GET");
+  },
 
 
-  getClassInfo(Id){
-     return apiRequest(`${API_BASE_URL}/${Id}`);
+  getClassInfo(Id) {
+    return apiRequest(`${API_BASE_URL}/${Id}`);
   },
 
 
@@ -57,10 +57,14 @@ export const classAPI = {
   deleteClass(classId) {
     return apiRequest(`${API_BASE_URL}/${classId}`, "DELETE");
   },
-  
+
   //===============
   //    Docs     
   //===============
+
+  deleteDoc(classId, docId) {
+    return apiRequest(`${API_BASE_URL}/${classId}/docs/${docId}`, "DELETE");
+  },
 
   deleteDocs(id) {
     return apiRequest(`${API_BASE_URL}/docs/${id}`, "DELETE");
@@ -76,12 +80,12 @@ export const classAPI = {
     formData.append("class_id", class_id);
     formData.append("doc_title", doc_title);
     formData.append("file", file);
-    
+
     const headers = {};
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
-    
+
     const res = await fetch(`${API_BASE_URL}/docs`, {
       method: "POST",
       headers,
@@ -91,7 +95,7 @@ export const classAPI = {
     return await res.json();
   },
 
- 
+
   async getDocs(id) {
     const token = localStorage.getItem("token");
     const endpoint = `${API_BASE_URL}/docs/${id}`;
@@ -107,7 +111,7 @@ export const classAPI = {
       throw new Error("Failed to fetch documents");
     }
 
-    return await res.json(); 
+    return await res.json();
   },
 
 

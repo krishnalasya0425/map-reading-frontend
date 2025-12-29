@@ -5,7 +5,7 @@ export default function StudentDashboard() {
     <div className="p-8">
       <h2 className="text-3xl font-bold text-green-800">Student Dashboard</h2>
 
-      <div className="bg-white shadow rounded-lg mt-6 p-6">
+      <div className="shadow rounded-lg mt-6 p-6" style={{ backgroundColor: '#9FCF9F' }}>
         <h3 className="text-xl font-semibold text-gray-700 mb-3">
           Welcome to Map Reading System
         </h3>

@@ -19,7 +19,8 @@ const FileModal = ({ fileId, docType, onClose }) => {
       {isPDF && (
         <iframe
           src={fileURL}
-          className="w-full h-screen bg-white rounded shadow-xl"
+          className="w-full h-screen rounded shadow-xl"
+          style={{ backgroundColor: '#9FCF9F' }}
         ></iframe>
       )}
 

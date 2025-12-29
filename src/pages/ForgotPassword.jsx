@@ -33,17 +33,16 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100 px-4">
+    <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-green-50 to-green-100 px-4">
       <div className="bg-white shadow-lg rounded-xl p-8 max-w-md w-full border border-gray-200">
 
         {/* Logo */}
         <div className="flex items-center justify-center mb-4">
-          <img
-            src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg"
-            alt="logo"
-            className="w-10 h-10 mr-2"
-          />
-          <h1 className="text-xl font-bold text-blue-600">Map Reading</h1>
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+            <circle cx="20" cy="20" r="20" fill="#074F06" />
+            <path d="M20 10C16.134 10 13 13.134 13 17C13 22.25 20 30 20 30C20 30 27 22.25 27 17C27 13.134 23.866 10 20 10ZM20 19.5C18.619 19.5 17.5 18.381 17.5 17C17.5 15.619 18.619 14.5 20 14.5C21.381 14.5 22.5 15.619 22.5 17C22.5 18.381 21.381 19.5 20 19.5Z" fill="white" />
+          </svg>
+          <h1 className="text-xl font-bold" style={{ color: '#074F06' }}>Map Reading</h1>
         </div>
 
         <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
@@ -51,7 +50,7 @@ export default function ForgotPassword() {
         </h2>
 
         {msg && (
-          <p className="text-center mb-4 text-sm text-blue-600 font-medium">
+          <p className="text-center mb-4 text-sm font-medium" style={{ color: '#074F06' }}>
             {msg}
           </p>
         )}
@@ -75,7 +74,7 @@ export default function ForgotPassword() {
 
             <p className="text-sm text-center mt-4">
               Remember your password?{" "}
-              <a href="/login" className="text-blue-600 hover:underline">
+              <a href="/login" className="hover:underline" style={{ color: '#074F06' }}>
                 Login
               </a>
             </p>

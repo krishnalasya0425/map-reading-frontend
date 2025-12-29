@@ -5,7 +5,7 @@ import Header from "../components/Header";
 import { useAuth } from "../context/AuthContext";
 
 export default function MainLayout() {
- 
+
   const role = localStorage.getItem("role")
   console.log(role)
   const location = useLocation();
@@ -32,9 +32,9 @@ export default function MainLayout() {
   }
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-white text-black overflow-hidden">
-      <Header role = {role}/>
-      <div className="flex-grow bg-egreen bg-opacity-5 overflow-auto">
+    <div className="w-screen h-screen flex flex-col text-black overflow-hidden bg-gradient-to-br from-green-50 to-green-100">
+      <Header role={role} />
+      <div className="flex-grow overflow-auto bg-gradient-to-br from-green-50 to-green-100">
         {routes}
       </div>
     </div>

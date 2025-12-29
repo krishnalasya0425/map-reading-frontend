@@ -91,7 +91,7 @@ export default function AdminDashboard() {
     }
   };
 
-   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const startEdit = (u) => {
     setEditingUser(u);
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
   const renderTable = (users) => (
     <div className="overflow-x-auto mt-4 shadow-md rounded-lg border border-gray-200">
       <table className="w-full text-left">
-        <thead className="bg-blue-600 text-white">
+        <thead className="text-white" style={{ backgroundColor: '#074F06' }}>
           <tr>
             <th className="p-3">Name</th>
             <th className="p-3">Army ID</th>
@@ -143,7 +143,9 @@ export default function AdminDashboard() {
 
         <tbody>
           {users.map((u) => (
-            <tr key={u.id} className="border-b hover:bg-blue-50">
+            <tr key={u.id} className="border-b" style={{ backgroundColor: '#D5F2D5' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#C0E8C0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#D5F2D5'}>
               <td className="p-3">{u.name}</td>
               <td className="p-3">{u.army_id}</td>
               <td className="p-3">{u.batch_no}</td>
@@ -164,7 +166,8 @@ export default function AdminDashboard() {
               <td className="p-3 flex gap-2 justify-center">
                 <button
                   onClick={() => startEdit(u)}
-                  className="text-blue-600 hover:text-blue-800"
+                  className="hover:text-green-800"
+                  style={{ color: '#074F06' }}
                 >
                   <FaEdit size={18} />
                 </button>
@@ -220,41 +223,41 @@ export default function AdminDashboard() {
 
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-blue-700">
+        <h1 className="text-3xl font-bold" style={{ color: '#074F06' }}>
           {role === "Instructor" ? "Instructor Dashboard" : "Admin Dashboard"}
         </h1>
 
-      
+
       </div>
 
       {/* FILTER BUTTONS */}
       <div className="flex gap-4 mb-4">
         <button
-          className={`px-5 py-2 rounded-lg shadow flex items-center gap-2 ${
-            filter === "student"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-700"
-          }`}
+          className={`px-5 py-2 rounded-lg shadow flex items-center gap-2 ${filter === "student"
+            ? "text-white"
+            : "bg-gray-200 text-gray-700"
+            }`}
+          style={filter === "student" ? { backgroundColor: '#074F06' } : {}}
           onClick={() => setFilter("student")}
         >
           <FaUserGraduate />
           Students
         </button>
 
-      {role === "admin" && <>
-       <button
-          className={`px-5 py-2 rounded-lg shadow flex items-center gap-2 ${
-            filter === "instructor"
-              ? "bg-blue-600 text-white"
+        {role === "admin" && <>
+          <button
+            className={`px-5 py-2 rounded-lg shadow flex items-center gap-2 ${filter === "instructor"
+              ? "text-white"
               : "bg-gray-200 text-gray-700"
-          }`}
-          onClick={() => setFilter("instructor")}
-        >
-          <FaChalkboardTeacher />
-          Instructors
-        </button>
+              }`}
+            style={filter === "instructor" ? { backgroundColor: '#074F06' } : {}}
+            onClick={() => setFilter("instructor")}
+          >
+            <FaChalkboardTeacher />
+            Instructors
+          </button>
 
-      </>} 
+        </>}
         {/* <button
           onClick={() => {
             setEditingUser(null);
@@ -273,7 +276,7 @@ export default function AdminDashboard() {
       {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
+          <div className="p-6 rounded-lg shadow-lg w-[400px]" style={{ backgroundColor: '#D5F2D5' }}>
             <h3 className="text-xl font-bold mb-4">
               {editingUser ? "Edit User" : "Add User"}
             </h3>
@@ -295,13 +298,13 @@ export default function AdminDashboard() {
               <select className="input" name="status" value={form.status} onChange={handleChange}>
                 <option value="Pending">Pending</option>
                 <option value="Approved">Approved</option>
-                 <option value="Denied">Denied</option>
+                <option value="Denied">Denied</option>
               </select>
 
 
               <div className="flex justify-end gap-3 mt-4">
                 <button type="button" className="bg-gray-300 px-4 py-2 rounded" onClick={cancelEdit}>Cancel</button>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded">
+                <button className="text-white px-4 py-2 rounded" style={{ backgroundColor: '#074F06' }}>
                   {editingUser ? "Update" : "Add"}
                 </button>
               </div>
@@ -313,7 +316,7 @@ export default function AdminDashboard() {
       {/* APPROVE STUDENT WITH CLASS SELECTION MODAL (For Instructors) */}
       {approvingStudent && role === "Instructor" && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
+          <div className="p-6 rounded-lg shadow-lg w-[400px]" style={{ backgroundColor: '#D5F2D5' }}>
             <h3 className="text-xl font-bold mb-4">Approve Student & Assign to Class</h3>
             <p className="mb-4 text-gray-600">
               Student: <strong>{approvingStudent.name}</strong> ({approvingStudent.army_id})
@@ -328,7 +331,8 @@ export default function AdminDashboard() {
                     setSelectedClassId("");
                     navigate("/classes");
                   }}
-                  className="text-blue-600 hover:text-blue-800 underline font-semibold"
+                  className="hover:text-green-800 underline font-semibold"
+                  style={{ color: '#074F06' }}
                 >
                   Go to Classes Page →
                 </button>
