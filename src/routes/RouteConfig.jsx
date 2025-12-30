@@ -8,6 +8,9 @@ import Test from "../components/TestQuestions";
 import TestMaker from "../components/ParseQuestions";
 import StudentDashboard from "../pages/StudentDashboard";
 import GenerateTest from "../components/GenerateTest";
+import Scoremodal from "../components/Scoremodal";
+import ClassWiseScore from "../components/ClassWiseScore";
+
 
 
 
@@ -16,13 +19,14 @@ import GenerateTest from "../components/GenerateTest";
 const routesConfig = [
   { path: '/forgotpassword', element: <ForgotPassword /> },
   { path: '/dashboard', element: <AdminDashboard />, roles: ['admin', 'Instructor'] },
+  //  { path: '/testMakere', element: <TestMaker/>, roles: ['admin', 'Instructor'] },
  { path: '/:classId/docs', element: <Docs/>, roles: ['admin', 'Instructor','Student'] },
   { path: '/as', element: <StudentDashboard/>, roles: ['Student']},
    { path: '/classes', element: <Classes/>, roles: ['admin', 'Instructor', 'Student'] },
-   { path: '/test', element: <Test/>, roles: ['Student']},
-  { path: '/Test', element: <TestMaker/>, roles: ['admin', 'Instructor']},
+   { path: '/:testId/questions', element: <Test/>, roles: ['Student']},
+  { path: '/Test', element: <Scoremodal/>, roles: ['admin', 'Instructor','Student']},
    { path: '/:classId/generatetest', element: <GenerateTest/>, roles: ['admin', 'Instructor']},
-
+  {path : '/:testId/review', element :<ClassWiseScore/>, roles: ['admin', 'Instructor','Student']},
 
  
 ];

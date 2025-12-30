@@ -42,7 +42,7 @@ export default function Header() {
                 ![
                   "/forgotpassword",
                   "/resetpassword",
-                  "/:classId/docs","/:classId/generatetest",
+                  "/:classId/docs","/:classId/generatetest","/:classId/review","/:testId/questions","/:testId/review"
                 ].includes(r.path)
             )
             .map((r, idx) => {
