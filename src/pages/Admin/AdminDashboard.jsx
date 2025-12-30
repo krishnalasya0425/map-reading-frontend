@@ -95,7 +95,7 @@ export default function AdminDashboard() {
 
   const startEdit = (u) => {
     setEditingUser(u);
-    setForm({ ...u, password: "" });
+    setForm({ ...u});
     setShowModal(true);
   };
 
