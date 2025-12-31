@@ -42,6 +42,29 @@ export const classAPI = {
 },
 
 
+async adminAddClass(formData) {
+  const token = localStorage.getItem("token");
+
+  const headers = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/`, {
+    method: "POST",
+    headers, // ❗ do NOT set Content-Type for FormData
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw new Error(`API error: ${res.status}`);
+  }
+
+  return await res.json();
+},
+
+
+
   getClassInfo(Id){
      return apiRequest(`${API_BASE_URL}/${Id}`);
   },

@@ -18,6 +18,12 @@ const Classes = () => {
   const [editMode, setEditMode] = useState(false);
   const [editClassId, setEditClassId] = useState(null);
   const [editClassName, setEditClassName] = useState("");
+  // 🔹 Admin Add Class Modal states
+const [showAddModal, setShowAddModal] = useState(false);
+const [className, setClassName] = useState("");
+const [instructorId, setInstructorId] = useState("");
+const [zipFile, setZip] = useState(null);
+
 
   // Load classes on mount AND when instructor filter changes
   useEffect(() => {
@@ -64,6 +70,36 @@ const Classes = () => {
       console.error("Error loading classes", err);
     }
   };
+
+
+  const submitAddClass = async () => {
+  if (!className || !instructorId ) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("class_name", className);
+    formData.append("instructor_id", instructorId);
+   
+
+    await classAPI.adminAddClass(formData);
+
+    alert("Class created successfully");
+
+    setShowAddModal(false);
+    setClassName("");
+    setInstructorId("");
+    
+
+    loadClasses();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to create class");
+  }
+};
+
 
   const handleAdd = async () => {
     await classAPI.addClass(addClassName, id);
@@ -118,25 +154,61 @@ const Classes = () => {
       )}
 
       {/* ================================
-         INSTRUCTOR → ADD CLASS
-      ================================= */}
-      {role === "Instructor" && (
-        <div className="flex gap-3 mb-6">
+   ADMIN → ADD CLASS BUTTON & MODAL
+================================ */}
+{role === "admin" && (
+  <>
+    <button
+      className="bg-green-600 text-white px-4 py-2 rounded mb-4"
+      onClick={() => setShowAddModal(true)}
+    >
+      + Add Class
+    </button>
+
+    {showAddModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+        <div className="bg-white p-6 rounded w-[400px]">
+          <h3 className="text-xl font-bold mb-4">Add Class</h3>
+
           <input
-            type="text"
-            value={addClassName}
-            onChange={(e) => setAddClassName(e.target.value)}
-            placeholder="Enter class name"
-            className="border px-3 py-2 w-full rounded"
+            placeholder="Class Name"
+            className="border w-full mb-3 px-3 py-2"
+            value={className}
+            onChange={(e) => setClassName(e.target.value)}
           />
-          <button
-            onClick={handleAdd}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
+
+          <select
+            className="border w-full mb-3 px-3 py-2"
+            value={instructorId}
+            onChange={(e) => setInstructorId(e.target.value)}
           >
-            <FiPlus /> Add
-          </button>
+            <option value="">Select Instructor</option>
+            {instructors.map((i) => (
+              <option key={i.id} value={i.id}>
+                {i.name}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex justify-end gap-3">
+            <button
+              className="px-4 py-2 bg-gray-300 rounded"
+              onClick={() => setShowAddModal(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+              onClick={submitAddClass}
+            >
+              Save
+            </button>
+          </div>
         </div>
-      )}
+      </div>
+    )}
+  </>
+)}
 
       {/* ================================
          CLASS LIST
@@ -195,6 +267,55 @@ const Classes = () => {
           </div>
         ))}
       </div>
+
+      {/* =========================
+    ADMIN ADD CLASS MODAL
+========================= */}
+{showAddModal && role === "admin" && (
+  <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded w-[400px]">
+      <h3 className="text-xl font-bold mb-4">Add Class</h3>
+
+      <input
+        placeholder="Class Name"
+        className="border w-full mb-3 px-3 py-2"
+        value={className}
+        onChange={(e) => setClassName(e.target.value)}
+      />
+
+      <select
+        className="border w-full mb-3 px-3 py-2"
+        value={instructorId}
+        onChange={(e) => setInstructorId(e.target.value)}
+      >
+        <option value="">Select Instructor</option>
+        {instructors.map((i) => (
+          <option key={i.id} value={i.id}>
+            {i.name}
+          </option>
+        ))}
+      </select>
+
+      
+
+      <div className="flex justify-end gap-3">
+        <button
+          className="px-4 py-2 bg-gray-300 rounded"
+          onClick={() => setShowAddModal(false)}
+        >
+          Cancel
+        </button>
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+          onClick={submitAddClass}
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
