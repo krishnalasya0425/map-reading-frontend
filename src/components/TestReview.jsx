@@ -78,8 +78,8 @@ const TestReview = () => {
                 {q.question_type === "tf" && (
                   <div className="mt-3">
                     {["True", "False"].map((val) => {
-                      const isCorrect = opt.key === q.correct_answer;
-                    const isChosen = q.selected_answer=== opt.key;
+                      const isCorrect = val === q.correct_answer;
+                    const isChosen = q.selected_answer=== val;
 
                       let style =
                         "p-3 rounded-lg mt-2 border transition";
