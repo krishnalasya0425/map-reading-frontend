@@ -88,6 +88,16 @@ const TestManagement = () => {
     loadTests();
   };
 
+  const formatDateTime = (date) => {
+  if (!date) return "-";
+  return new Date(date).toLocaleString();
+};
+
+
+const now = new Date();
+
+
+
 
 
   return (
@@ -153,7 +163,7 @@ const TestManagement = () => {
                   className="border px-2 py-1 rounded"
                 />
               ) : (
-                <span className="text-lg">{test.title}</span>
+                <span className="text-lg text-black">{test.title}</span>
               )}
             </div>
 
@@ -171,26 +181,98 @@ const TestManagement = () => {
               </button>
               </> )}
 
-                 {role === "Student" && (
-  <>
-    {test.score === null ? (
-      // 🟢 START EXAM
-      <button
-        onClick={() => navigate(`/${test.id}/questions`)}
-        className="flex items-center gap-2 text-green-600 hover:text-green-800"
-        title="Start Exam"
-      >
-        <FiArrowRight size={20} />
-        <span>Start Exam</span>
-      </button>
-    ) : (
-      // 🔵 SHOW SCORE
-      <div className="text-blue-700 font-semibold">
-        Score: {test.score} / {test.total_questions}
+                
+                
+               {role === "Student" && (
+  <div className=" rounded-lg p-4 bg-white shadow-sm space-y-3">
+
+
+    {/* ================= TITLE ================= */}
+    <div className="flex justify-between items-center">
+      <h2 className="text-lg font-semibold text-gray-800">
+        {test.test_title} — {test.set_name}
+      </h2>
+
+       
+
+      {/* ================= START / SCORE ================= */}
+      {test.score === null ? (
+        <button
+          onClick={() => navigate(`/${test.test_set_id}/questions`)}
+          className="flex items-center gap-2 text-green-600 hover:text-green-800"
+          title="Start Exam"
+        >
+          <FiArrowRight size={18} />
+          <span>Start Exam</span>
+        </button>
+      ) : (
+           
+        
+
+        <span className="text-blue-700 font-semibold">
+           <button
+          onClick={() => navigate(`/${test.test_set_id}/${userId}`)}
+          className="flex items-center gap-2 text-green-600 hover:text-green-800"
+          title="Start Exam"
+        >
+          <FiArrowRight size={18} />
+          <span>view Questions </span>
+        </button>
+
+          {test.score} / {test.total_questions}
+        </span>
+
+        
+      )}
+    </div>
+
+    {/* ================= META INFO ================= */}
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-700">
+
+      {/* Total Questions */}
+      <div>
+        <span className="font-medium">Questions</span>
+        <p>{test.total_questions}</p>
       </div>
-    )}
-  </>
+
+      {/* Exam Type */}
+      <div>
+        <span className="font-medium">Exam Type</span>
+        <p>{test.exam_type}</p>
+      </div>
+
+      {/* TIMED */}
+      {test.exam_type === "TIMED" && (
+        <div>
+          <span className="font-medium">Duration</span>
+          <p>{test.duration_minutes} mins</p>
+        </div>
+      )}
+
+      {/* FIXED TIME */}
+      {test.exam_type === "FIXED_TIME" && (
+        <>
+          <div>
+            <span className="font-medium">Start Time</span>
+            <p>{formatDateTime(test.start_time)}</p>
+          </div>
+          <div>
+            <span className="font-medium">End Time</span>
+            <p>{formatDateTime(test.end_time)}</p>
+          </div>
+        </>
+      )}
+
+      {/* PASS THRESHOLD */}
+      <div>
+        <span className="font-medium">Pass Mark</span>
+        <p>{test.pass_threshold}</p>
+      </div>
+
+    </div>
+  </div>
 )}
+
 
 
               {/* Admin / Instructor */}

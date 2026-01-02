@@ -41,7 +41,7 @@ export default function ParseQuestions() {
     const selectedQuestions = questions.filter(q => selected.includes(q.id));
     const payload = buildPayload(selectedQuestions);
 
-    const data = await test.addQuestions(1, payload); 
+    const data = await test.addQuestions(8, payload); 
 
     alert("Questions inserted successfully 🚀");
     console.log("Inserted:", data);

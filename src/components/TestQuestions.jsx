@@ -12,10 +12,93 @@ const TestQuestions = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [examMeta, setExamMeta] = useState(null);
+const [remainingSeconds, setRemainingSeconds] = useState(null);
+const [timerExpired, setTimerExpired] = useState(false);
+const [startedAt, setStartedAt] = useState(null);
+
+  
+  
+  
+  const startTest = async () => {
+  try {
+    setLoading(true);
+
+    const res = await test.getQuestionsByTestId(testId);
+
+    setExamMeta(res);
+    setQuestions(res.questions);
+
+    const map = {};
+    res.questions.forEach((q) => (map[q.id] = q.answer));
+    setCorrectAnswers(map);
+
+    setStartedAt(new Date()); // track start time
+
+    handleExamTiming(res); // 👈 NEW
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const handleExamTiming = (exam) => {
+  const now = new Date();
+
+  // ================= UNTIMED =================
+  if (exam.exam_type === "UNTIMED") {
+    return;
+  }
+
+  // ================= TIMED =================
+  if (exam.exam_type === "TIMED") {
+    const seconds = exam.duration_minutes * 60;
+    setRemainingSeconds(seconds);
+    return;
+  }
+
+  // ================= FIXED_TIME =================
+  if (exam.exam_type === "FIXED_TIME") {
+    const start = new Date(exam.start_time);
+    const end = new Date(exam.end_time);
+
+    if (now < start) {
+      alert("Exam has not started yet");
+      return;
+    }
+
+    if (now > end) {
+      alert("Exam already ended");
+      return;
+    }
+
+    const remaining = Math.floor((end - now) / 1000);
+    setRemainingSeconds(remaining);
+  }
+};
+
+useEffect(() => {
+  if (remainingSeconds === null) return;
+
+  if (remainingSeconds <= 0) {
+    setTimerExpired(true);
+    submitTest(true); // auto-submit
+    return;
+  }
+
+  const interval = setInterval(() => {
+    setRemainingSeconds((prev) => prev - 1);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [remainingSeconds]);
+
 
 
   const testName = "JavaScript Basic Test"; 
-
+ 
  const { testId } = useParams();
 
   const student_id = localStorage.getItem("id")
@@ -25,38 +108,32 @@ const TestQuestions = () => {
 }, [testId]);
 
 
- const startTest = async () => {
-  try {
-    setLoading(true);
-    const fetchQuestions = await test.getQuestionsByTestId(testId);
-    setQuestions(fetchQuestions);
-
-    const map = {};
-    fetchQuestions.forEach((q) => (map[q.id] = q.answer));
-    setCorrectAnswers(map);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-};
 
 
   const handleAnswerChange = (qid, choice) => {
     setUserAnswers((prev) => ({ ...prev, [qid]: choice }));
   };
 
-  const submitTest = async () => {
-    let result = 0;
+ const submitTest = async () => {
+  let result = 0;
 
-    questions.forEach((q) => {
-      if (userAnswers[q.id] === correctAnswers[q.id]) result++;
-    });
+  questions.forEach((q) => {
+    if (userAnswers[q.id] === correctAnswers[q.id]) result++;
+  });
 
-    setScore(result);
+  setScore(result);
 
-    await score1.postScore(testId, student_id, result, questions.length);
-  };
+  await score1.postScore({
+    test_set_id: examMeta.test_set_id,
+    student_id,
+    score: result,
+    total_questions: questions.length,
+    started_at: startedAt,
+    submitted_at: new Date(),
+     answers: userAnswers ,
+  });
+};
+
 
   const q = questions[currentIndex];
 
@@ -67,6 +144,18 @@ const TestQuestions = () => {
     </div>
   );
 }
+
+if (timerExpired) {
+  return (
+    <div className="p-6 text-center">
+      <h2 className="text-2xl font-bold text-red-600">
+        ⏰ Time is up!
+      </h2>
+      <p>Your test was auto-submitted.</p>
+    </div>
+  );
+}
+
 
 
   // =========================================================================================
@@ -163,6 +252,16 @@ const TestQuestions = () => {
           Answer all questions carefully. Each question carries 1 mark.
         </p>
       </div>
+
+      {remainingSeconds !== null && (
+  <div className="text-center mb-4">
+    <span className="text-lg font-semibold text-red-600">
+      ⏳ Time Left: {Math.floor(remainingSeconds / 60)}:
+      {(remainingSeconds % 60).toString().padStart(2, "0")}
+    </span>
+  </div>
+)}
+
 
       {/* ======================== START BUTTON ======================== */}
       {/* {questions.length === 0 && (

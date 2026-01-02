@@ -26,7 +26,7 @@ export default function AdminDashboard() {
     regiment: "",
     batch_no: "",
     army_id: "",
-    role: "student",
+    role: "",
     password: "",
     status: "",
   });
