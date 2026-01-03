@@ -24,6 +24,16 @@ const Users= {
         }
     },
 
+    async downloadUserinfo(id){
+        try {
+            const response = await axios.get(`${API_URL}/download/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user details:', error);
+            throw error;
+        }
+    },
+
 };
 
 export default Users;

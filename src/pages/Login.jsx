@@ -21,7 +21,7 @@ export default function Login() {
 
       if (user.role === "admin") navigate("/dashboard");
       else if (user.role === "Instructor") navigate("/dashboard");
-      else navigate("/student");
+      else navigate("/as");
     } catch (err) {
       setMsg(err.response?.data?.message || "Login failed");
     }

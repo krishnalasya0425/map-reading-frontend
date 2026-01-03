@@ -17,6 +17,10 @@ const [remainingSeconds, setRemainingSeconds] = useState(null);
 const [timerExpired, setTimerExpired] = useState(false);
 const [startedAt, setStartedAt] = useState(null);
 
+const [examNotStarted, setExamNotStarted] = useState(false);
+const [startCountdown, setStartCountdown] = useState(null);
+
+
   
   
   
@@ -59,32 +63,51 @@ const handleExamTiming = (exam) => {
     return;
   }
 
-  // ================= FIXED_TIME =================
-  if (exam.exam_type === "FIXED_TIME") {
-    const start = new Date(exam.start_time);
-    const end = new Date(exam.end_time);
 
-    if (now < start) {
-      alert("Exam has not started yet");
-      return;
-    }
 
-    if (now > end) {
-      alert("Exam already ended");
-      return;
-    }
+if (exam.exam_type === "FIXED_TIME") {
+  const start = new Date(exam.start_time);
+  const end = new Date(exam.end_time);
 
-    const remaining = Math.floor((end - now) / 1000);
-    setRemainingSeconds(remaining);
+  if (now < start) {
+    const secondsLeft = Math.floor((start - now) / 1000);
+    setRemainingSeconds(secondsLeft);
+    setExamNotStarted(true); // 👈 important
+    return;
   }
+
+  if (now > end) {
+    // exam ended → auto submit with score 0
+    alert("Exam already ended");
+    setQuestions([]);
+    submitTest(true,exam); // auto-submit
+    return;
+  }
+
+  // exam is ongoing
+  const remaining = Math.floor((end - now) / 1000);
+  setRemainingSeconds(remaining);
+  setExamNotStarted(false);
+}
+
 };
+
+
 
 useEffect(() => {
   if (remainingSeconds === null) return;
 
   if (remainingSeconds <= 0) {
+    // If exam was waiting → now START exam
+    if (examNotStarted) {
+      setExamNotStarted(false);
+      handleExamTiming(examMeta); // re-check timing & load questions
+      return;
+    }
+
+    // Normal exam timer expiry
     setTimerExpired(true);
-    submitTest(true); // auto-submit
+    submitTest(true,examMeta);
     return;
   }
 
@@ -93,7 +116,8 @@ useEffect(() => {
   }, 1000);
 
   return () => clearInterval(interval);
-}, [remainingSeconds]);
+}, [remainingSeconds, examNotStarted]);
+
 
 
 
@@ -114,25 +138,30 @@ useEffect(() => {
     setUserAnswers((prev) => ({ ...prev, [qid]: choice }));
   };
 
- const submitTest = async () => {
+const submitTest = async (auto = false, meta = examMeta) => {
+  if (!meta) return; // safety
+
   let result = 0;
 
-  questions.forEach((q) => {
-    if (userAnswers[q.id] === correctAnswers[q.id]) result++;
-  });
+  if (!auto) {
+    questions.forEach((q) => {
+      if (userAnswers[q.id] === correctAnswers[q.id]) result++;
+    });
+  }
 
   setScore(result);
 
   await score1.postScore({
-    test_set_id: examMeta.test_set_id,
+    test_set_id: meta.test_set_id,
     student_id,
     score: result,
     total_questions: questions.length,
     started_at: startedAt,
     submitted_at: new Date(),
-     answers: userAnswers ,
+    answers: userAnswers,
   });
 };
+
 
 
   const q = questions[currentIndex];
@@ -155,6 +184,8 @@ if (timerExpired) {
     </div>
   );
 }
+
+
 
 
 
@@ -263,20 +294,10 @@ if (timerExpired) {
 )}
 
 
-      {/* ======================== START BUTTON ======================== */}
-      {/* {questions.length === 0 && (
-        <div className="text-center">
-          <button
-            onClick={startTest}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-          >
-            Start Test
-          </button>
-        </div>
-      )} */}
+    
 
       {/* ====================== QUESTIONS UI ====================== */}
-      {questions.length > 0 && (
+      {!examNotStarted &&questions.length > 0 && (
         <>
           {/* Progress Bar */}
           <div className="w-full bg-gray-200 rounded-full h-3 mt-4">
@@ -369,6 +390,20 @@ if (timerExpired) {
           </div>
         </>
       )}
+
+      {examNotStarted && remainingSeconds !== null && (
+  <div className="p-6 max-w-md mx-auto text-center bg-yellow-50 border rounded-lg">
+    <h2 className="text-xl font-bold text-orange-600 mb-2">
+      ⏳ Exam Not Started Yet
+    </h2>
+    <p className="text-lg font-semibold">
+      Starts in{" "}
+      {Math.floor(remainingSeconds / 60)}:
+      {(remainingSeconds % 60).toString().padStart(2, "0")}
+    </p>
+  </div>
+)}
+
     </div>
   );
 };

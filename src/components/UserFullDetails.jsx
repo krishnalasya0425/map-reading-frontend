@@ -48,6 +48,17 @@ const UserFullDetails = () => {
       {/* ================= USER DETAILS ================= */}
       <div>
         <h2 className="text-xl font-bold mb-3">User Details</h2>
+      <button 
+            onClick={() =>
+            window.open(
+              `${import.meta.env.VITE_API_URL}/users/download/${userId}`,
+              "_blank"
+            )
+          }
+          
+          className="mt-4 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
+            Download User Info PDF
+          </button>
         <table className="min-w-full border">
           <tbody>
             <tr><td className="p-2 font-semibold">Name</td><td>{name}</td></tr>
