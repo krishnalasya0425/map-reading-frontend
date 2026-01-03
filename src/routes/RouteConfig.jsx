@@ -11,12 +11,14 @@ import GenerateTest from "../components/GenerateTest";
 import Scoremodal from "../components/Scoremodal";
 import ClassWiseScore from "../components/ClassWiseScore";
 import TestReview from "../components/TestReview";
+import StudentDetails from "../pages/Admin/StudentDetails";
 
 const routesConfig = [
   { path: '/forgotpassword', element: <ForgotPassword /> },
   { path: '/dashboard', element: <AdminDashboard />, roles: ['admin', 'Instructor'], label: 'Dashboard' },
   { path: '/student-dashboard', element: <StudentDashboard />, roles: ['Student'], label: 'Dashboard' },
   { path: '/as', element: <StudentDashboard />, roles: ['Student'] }, // Additional route 
+  { path: '/student/:studentId', element: <StudentDetails />, roles: ['admin', 'Instructor'] },
   { path: '/classes', element: <Classes />, roles: ['admin', 'Instructor', 'Student'], label: 'Classes' },
   { path: '/:classId/docs', element: <Docs />, roles: ['admin', 'Instructor', 'Student'] },
   { path: '/:classId/generatetest', element: <GenerateTest />, roles: ['admin', 'Instructor'] },

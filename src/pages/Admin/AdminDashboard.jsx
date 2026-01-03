@@ -243,7 +243,18 @@ export default function AdminDashboard() {
             <tr key={u.id} className="border-b" style={{ backgroundColor: '#D5F2D5' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#C0E8C0'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#D5F2D5'}>
-              <td className="p-3">{u.name}</td>
+              <td className="p-3">
+                {u.role === "student" || filter === "student" ? (
+                  <button
+                    onClick={() => navigate(`/student/${u.id}`)}
+                    className="hover:underline font-bold text-left hover:text-[#074F06] transition-colors"
+                  >
+                    {u.name}
+                  </button>
+                ) : (
+                  u.name
+                )}
+              </td>
               <td className="p-3">{u.army_id}</td>
               <td className="p-3">{u.batch_no}</td>
               <td className="p-3">{u.regiment}</td>

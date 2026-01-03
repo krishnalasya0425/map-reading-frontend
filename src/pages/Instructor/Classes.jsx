@@ -130,13 +130,13 @@ const Classes = () => {
               </h1>
               <p className="text-gray-600">
                 {role === "admin" ? "Manage all classes across instructors" :
-                  role === "Instructor" ? "Create and manage your classes" :
+                  role === "Instructor" ? "Manage your assigned classes" :
                     "View your enrolled classes"}
               </p>
             </div>
 
             {/* Add Class Button - Instructor and Admin */}
-            {(role === "Instructor" || role === "admin") && (
+            {role === "admin" && (
               <button
                 onClick={() => setShowAddModal(true)}
                 className="flex items-center gap-2 px-6 py-3 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
@@ -145,7 +145,7 @@ const Classes = () => {
                 onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
               >
                 <FiPlus size={20} />
-                {role === "admin" ? "Add New Class" : "Create New Class"}
+                Add New Class
               </button>
             )}
           </div>
@@ -257,7 +257,7 @@ const Classes = () => {
             </div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No Classes Found</h3>
             <p className="text-gray-500">
-              {role === "Instructor" ? "Create your first class to get started" : "No classes available yet"}
+              {role === "Instructor" ? "No classes assigned to you yet" : "No classes available yet"}
             </p>
           </div>
         ) : (
