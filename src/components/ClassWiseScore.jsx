@@ -202,6 +202,15 @@ const [data, setData] = useState({
         }
       };
 
+
+      const deleteSubTest = async(id )=>{
+         try {
+        await setTestAPI.deleteById(id)
+        fetchData();
+        } catch (err) {
+          console.error("Failed to load test set results", err);
+        }
+      }
    
 
 
@@ -250,10 +259,14 @@ const [data, setData] = useState({
             {set_name}
           </h2>
 
-          <button onClick={() => handleTestData(set_id)} className="mb-3 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
-            View Results
+          <button 
+            onClick={() => deleteSubTest(set_id)}
+          
+          className="mt-4 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
+            Delete
           </button>
 
+        
           {/* Exam Type Badge */}
           <span
             className={`inline-block px-3 py-1 text-sm rounded-full mb-3
@@ -284,8 +297,28 @@ const [data, setData] = useState({
           }
           
           className="mt-4 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
-            View Questions
+            Download Questions
           </button>
+
+             {/* <button onClick={() => handleTestSetQuestions(set_id)} className="mb-3 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
+            View Questions
+          </button> */}
+
+       <button onClick={() => handleTestData(set_id)} className="mb-3 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
+            View Score
+          </button>
+
+           <button
+          onClick={() =>
+            window.open(
+              `${import.meta.env.VITE_API_URL}/subtest/downloadscore/${set_id}`,
+              "_blank"
+            )
+          }
+          className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition"
+        >
+          <FiDownload /> Score PDF
+        </button>
         </div>
       )
     )}

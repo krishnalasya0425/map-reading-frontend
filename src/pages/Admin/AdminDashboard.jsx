@@ -16,7 +16,7 @@ import {
 } from "react-icons/fa";
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
+ 
   const [filter, setFilter] = useState("student");
   const [students, setStudents] = useState([]);
   const [instructors, setInstructors] = useState([]);
@@ -37,7 +37,7 @@ export default function AdminDashboard() {
 
   const role = localStorage.getItem("role");
   const instructorId = localStorage.getItem("id");
-
+  const navigate = useNavigate();
   useEffect(() => {
     if (!localStorage.getItem("token")) window.location.href = "/login";
   }, []);
@@ -126,7 +126,9 @@ export default function AdminDashboard() {
     }
   };
 
+
   const renderTable = (users) => (
+    
     <div className="overflow-x-auto mt-4 shadow-md rounded-lg border border-gray-200">
       <table className="w-full text-left">
         <thead className="bg-blue-600 text-white">
@@ -143,8 +145,9 @@ export default function AdminDashboard() {
 
         <tbody>
           {users.map((u) => (
-            <tr key={u.id} className="border-b hover:bg-blue-50">
-              <td className="p-3">{u.name}</td>
+            <tr key={u.id} className="border-b hover:bg-blue-50 ">
+             {u.role !== "Instructor" ?  <td    onClick={()=> navigate(`/${u.id}/details`)} className="p-3 underline text-bold">
+                {u.name}</td> : <td className="p-3">{u.name}</td>}
               <td className="p-3">{u.army_id}</td>
               <td className="p-3">{u.batch_no}</td>
               <td className="p-3">{u.regiment}</td>
@@ -213,6 +216,8 @@ export default function AdminDashboard() {
   );
 
   const users = filter === "student" ? students : instructors;
+  
+  console.log(users)
 
 
   return (

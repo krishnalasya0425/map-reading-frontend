@@ -40,7 +40,7 @@ export default function Header() {
             .filter(
               (r) =>
                 ![
-                  "/forgotpassword",
+                  "/forgotpassword","/:userId/details",
                   "/resetpassword",
                   "/:classId/docs","/:classId/generatetest","/:classId/review","/:testId/questions","/:testId/review","/:test_set_id/:student_id"
                 ].includes(r.path)

@@ -24,8 +24,16 @@ async function apiRequest(url, method = "GET", body = null) {
 const setTest = {
 
   getSetTest(Id){
-     return apiRequest(`${API_URL}/${Id}`);
+     return apiRequest(`${API_URL}/g/${Id}`);
   },
+
+   deleteById(Id){
+     return apiRequest(`${API_URL}/delete/${Id}`,"DELETE");
+  },
+
+    getTestSetQuestions(Id){
+      return apiRequest(`${API_URL}/testquestions/${Id}`);
+    },
 
 
     

@@ -26,7 +26,7 @@ const CreateSubTestModal = ({ testId, onClose }) => {
       
 
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/subtest/${testId}`,
+        `${import.meta.env.VITE_API_URL}/subtest/c/${testId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
