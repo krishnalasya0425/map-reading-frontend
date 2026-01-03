@@ -147,6 +147,7 @@ const GenerateTest = () => {
 
       setMessage("Test created successfully!");
       setMessageType("success");
+      alert("generation of test is completed");
 
       setTimeout(() => {
         navigate(`/${selectedClassId}/docs`);

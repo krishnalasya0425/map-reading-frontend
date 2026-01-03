@@ -1,6 +1,6 @@
 
 
-const API_BASE_URL = 'http://localhost:5000/tests';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/tests`;
 
 // Generic request helper
 async function apiRequest(url, method = "GET", body = null) {

@@ -1,26 +1,38 @@
 import React, { useState } from "react";
 import { parseRawQuestions } from "../utils/parseQuestions";
 import test from "../entities/test.jsx";
-import { FiUpload, FiCheckCircle, FiXCircle, FiFileText, FiCheck } from "react-icons/fi";
+import {
+  FiUpload,
+  FiCheckCircle,
+  FiFileText,
+  FiCheck,
+  FiX,
+  FiAlertCircle
+} from "react-icons/fi";
+import { FaClipboardList } from "react-icons/fa";
 
 export default function ParseQuestions() {
   const [questions, setQuestions] = useState([]);
   const [selected, setSelected] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    setUploading(true);
     try {
       const text = await file.text();
       const rawJson = JSON.parse(text);
       const cleaned = parseRawQuestions(rawJson);
       setQuestions(cleaned);
-      // Auto-select all questions
+      // Select all by default
       setSelected(cleaned.map(q => q.id));
     } catch (err) {
       console.error("Error parsing: ", err);
       alert("Invalid JSON file! Please check the format.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -32,12 +44,12 @@ export default function ParseQuestions() {
     );
   };
 
-  const toggleSelectAll = () => {
-    if (selected.length === questions.length) {
-      setSelected([]);
-    } else {
-      setSelected(questions.map(q => q.id));
-    }
+  const selectAll = () => {
+    setSelected(questions.map(q => q.id));
+  };
+
+  const deselectAll = () => {
+    setSelected([]);
   };
 
   const handleSubmit = async () => {
@@ -50,22 +62,22 @@ export default function ParseQuestions() {
       const selectedQuestions = questions.filter(q => selected.includes(q.id));
       const payload = buildPayload(selectedQuestions);
 
-      const data = await test.addQuestions(1, payload);
+      const data = await test.addQuestions(11, payload);
 
-      alert(`✅ ${selected.length} questions inserted successfully!`);
+      alert(`✅ ${selected.length} question(s) inserted successfully!`);
       console.log("Inserted:", data);
 
       // Reset after successful submission
       setQuestions([]);
       setSelected([]);
-
     } catch (err) {
       console.error(err);
-      alert("❌ An error occurred while submitting questions!");
+      alert("An error occurred while submitting questions!");
     }
   };
 
   function buildPayload(questions) {
+    console.log("Building payload for questions:", questions);
     return questions.map(q => ({
       question_text: q.text,
       type: q.type,
@@ -78,169 +90,250 @@ export default function ParseQuestions() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-4">
-      <div className="max-w-5xl mx-auto space-y-4">
+    <div className="min-h-screen p-6" style={{ backgroundColor: '#f0fdf4' }}>
+      <div className="max-w-6xl mx-auto">
 
-        {/* ================= HEADER ================= */}
-        <div className="bg-white rounded-lg shadow p-5 border border-gray-200">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 rounded-lg" style={{ backgroundColor: '#074F06' }}>
-              <FiFileText className="text-white" size={24} />
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-3 rounded-lg" style={{ backgroundColor: '#074F06' }}>
+              <FaClipboardList className="text-white" size={28} />
             </div>
-            <h1 className="text-2xl font-bold" style={{ color: '#074F06' }}>Test Maker</h1>
+            <div>
+              <h1 className="text-4xl font-bold" style={{ color: '#074F06' }}>
+                Question Parser
+              </h1>
+              <p className="text-gray-600">
+                Upload and parse JSON questions for your tests
+              </p>
+            </div>
           </div>
-          <p className="text-gray-600 text-sm ml-14">Upload and manage test questions from JSON</p>
         </div>
 
-        {/* ================= FILE UPLOAD ================= */}
-        <div className="bg-white rounded-lg shadow p-5 border border-gray-200">
-          <label className="block mb-2 text-sm font-bold text-gray-800">
-            Upload Questions JSON File
-          </label>
-          <div className="relative">
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleFileUpload}
-              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:text-white file:cursor-pointer hover:file:shadow-lg transition-all"
-              style={{
-                fileBackgroundColor: '#074F06',
-              }}
-              id="file-upload"
-            />
-            <style>{`
-              #file-upload::file-selector-button {
-                background-color: #074F06;
-                transition: all 0.3s;
-              }
-              #file-upload::file-selector-button:hover {
-                background-color: #053d05;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-              }
-            `}</style>
+        {/* Upload Section */}
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <FiUpload size={24} style={{ color: '#074F06' }} />
+            <h2 className="text-2xl font-bold" style={{ color: '#074F06' }}>
+              Upload Questions File
+            </h2>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            <FiUpload className="inline mr-1" size={12} />
-            Supported format: JSON file with questions array
-          </p>
+
+          <div className="border-2 border-dashed rounded-xl p-8 text-center transition-all"
+            style={{ borderColor: '#074F06' }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.currentTarget.style.backgroundColor = '#D5F2D5';
+            }}
+            onDragLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <div className="mb-4">
+              <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3"
+                style={{ backgroundColor: '#D5F2D5' }}>
+                <FiFileText size={32} style={{ color: '#074F06' }} />
+              </div>
+              <p className="text-lg font-semibold text-gray-700 mb-2">
+                Drop your JSON file here or click to browse
+              </p>
+              <p className="text-sm text-gray-500">
+                Accepts .json files only
+              </p>
+            </div>
+
+            <label className="inline-flex items-center gap-2 px-6 py-3 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer"
+              style={{ backgroundColor: '#074F06' }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#053d05'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
+            >
+              <FiUpload size={20} />
+              {uploading ? 'Uploading...' : 'Choose File'}
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleFileUpload}
+                className="hidden"
+                disabled={uploading}
+              />
+            </label>
+          </div>
         </div>
 
-        {/* ================= QUESTIONS LIST ================= */}
+        {/* Questions List */}
         {questions.length > 0 && (
-          <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-            {/* Header */}
-            <div className="px-5 py-3 border-b border-gray-200" style={{ backgroundColor: '#f8faf8' }}>
+          <>
+            {/* Selection Controls */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-gray-800">
-                  Generated Questions ({questions.length})
-                </h2>
+                <div>
+                  <h2 className="text-2xl font-bold mb-1" style={{ color: '#074F06' }}>
+                    Parsed Questions
+                  </h2>
+                  <p className="text-gray-600">
+                    {selected.length} of {questions.length} questions selected
+                  </p>
+                </div>
+
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-600">
-                    {selected.length} of {questions.length} selected
-                  </span>
                   <button
-                    onClick={toggleSelectAll}
-                    className="text-xs px-3 py-1.5 rounded-md font-medium transition-all border-2"
-                    style={{
-                      color: '#074F06',
-                      borderColor: '#074F06',
-                      backgroundColor: 'white'
-                    }}
+                    onClick={selectAll}
+                    className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg font-medium transition-all border-2"
+                    style={{ color: '#074F06', borderColor: '#074F06' }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#D5F2D5'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                  >
+                    <FiCheck size={18} />
+                    Select All
+                  </button>
+
+                  <button
+                    onClick={deselectAll}
+                    className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg font-medium transition-all border-2 border-gray-300 hover:bg-gray-50"
+                  >
+                    <FiX size={18} />
+                    Deselect All
+                  </button>
+
+                  <button
+                    onClick={handleSubmit}
+                    disabled={selected.length === 0}
+                    className="flex items-center gap-2 px-6 py-2.5 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    style={{ backgroundColor: '#074F06' }}
                     onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = '#E8F5E9';
+                      if (!e.target.disabled) e.target.style.backgroundColor = '#053d05';
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'white';
+                      if (!e.target.disabled) e.target.style.backgroundColor = '#074F06';
                     }}
                   >
-                    {selected.length === questions.length ? 'Deselect All' : 'Select All'}
+                    <FiCheckCircle size={20} />
+                    Submit {selected.length > 0 && `(${selected.length})`}
                   </button>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mt-4">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${(selected.length / questions.length) * 100}%`,
+                      backgroundColor: '#074F06'
+                    }}
+                  ></div>
                 </div>
               </div>
             </div>
 
-            {/* Questions */}
-            <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+            {/* Questions Grid */}
+            <div className="space-y-4">
               {questions.map((q, idx) => {
                 const isSelected = selected.includes(q.id);
 
                 return (
                   <div
                     key={q.id}
-                    className={`p-4 transition-all cursor-pointer ${isSelected ? 'bg-green-50' : 'hover:bg-gray-50'
+                    className={`group bg-white rounded-xl shadow-lg transition-all duration-300 overflow-hidden border-2 cursor-pointer ${isSelected ? 'border-green-500' : 'border-gray-200'
                       }`}
                     onClick={() => toggleSelection(q.id)}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) e.currentTarget.style.borderColor = '#074F06';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) e.currentTarget.style.borderColor = '#e5e7eb';
+                    }}
                   >
-                    <div className="flex gap-4">
-                      {/* Checkbox */}
-                      <div className="flex-shrink-0 pt-1">
-                        <div
-                          className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isSelected
-                              ? 'border-green-600 bg-green-600'
-                              : 'border-gray-300 bg-white'
-                            }`}
-                        >
-                          {isSelected && <FiCheck className="text-white" size={14} />}
+                    <div className="p-6">
+                      {/* Question Header */}
+                      <div className="flex items-start gap-4 mb-4">
+                        {/* Checkbox */}
+                        <div className="flex-shrink-0 mt-1">
+                          <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${isSelected
+                              ? 'bg-green-500 border-green-500'
+                              : 'border-gray-300 group-hover:border-green-400'
+                            }`}>
+                            {isSelected && <FiCheck className="text-white" size={16} />}
+                          </div>
+                        </div>
+
+                        {/* Question Number Badge */}
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0"
+                          style={{ backgroundColor: '#074F06' }}>
+                          {idx + 1}
+                        </div>
+
+                        {/* Question Text */}
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                            {q.text}
+                          </h3>
+
+                          {/* Type Badge */}
+                          <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${q.type === 'mcq'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-purple-100 text-purple-700'
+                            }`}>
+                            {q.type === 'mcq' ? 'Multiple Choice' : 'True/False'}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Content */}
-                      <div className="flex-1">
-                        {/* Question Header */}
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-bold text-gray-500">Q{idx + 1}</span>
-                              <span
-                                className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                                style={{
-                                  backgroundColor: q.type === 'mcq' ? '#E3F2FD' : '#FFF3E0',
-                                  color: q.type === 'mcq' ? '#1565C0' : '#E65100'
-                                }}
+                      {/* Options */}
+                      {q.type !== "tf" && q.options && (
+                        <div className="ml-20 mb-4 space-y-2">
+                          {q.options.map((opt, optIdx) => {
+                            const letter = String.fromCharCode(65 + optIdx);
+                            const isCorrect = q.answer === letter;
+
+                            return (
+                              <div
+                                key={optIdx}
+                                className={`p-3 rounded-lg border-2 ${isCorrect
+                                    ? 'bg-green-50 border-green-300'
+                                    : 'bg-gray-50 border-gray-200'
+                                  }`}
                               >
-                                {q.type === 'mcq' ? 'Multiple Choice' : 'True/False'}
-                              </span>
-                            </div>
-                            <p className="font-medium text-gray-800">{q.text}</p>
-                          </div>
+                                <span className="font-semibold mr-2">{letter}.</span>
+                                {opt}
+                                {isCorrect && (
+                                  <FiCheckCircle className="inline ml-2 text-green-600" size={16} />
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
+                      )}
 
-                        {/* Options */}
-                        {q.type !== "tf" && q.options && (
-                          <div className="mt-3 space-y-1.5">
-                            {q.options.map((opt, optIdx) => {
-                              const letter = String.fromCharCode(65 + optIdx);
-                              const isCorrect = q.answer === letter;
+                      {/* True/False Options */}
+                      {q.type === "tf" && (
+                        <div className="ml-20 mb-4 space-y-2">
+                          {['True', 'False'].map((option) => {
+                            const isCorrect = q.answer === option;
 
-                              return (
-                                <div
-                                  key={optIdx}
-                                  className={`flex items-start gap-2 text-sm p-2 rounded ${isCorrect ? 'bg-green-100 border border-green-300' : 'bg-gray-50'
-                                    }`}
-                                >
-                                  <span className={`font-bold ${isCorrect ? 'text-green-700' : 'text-gray-600'}`}>
-                                    {letter}.
-                                  </span>
-                                  <span className={isCorrect ? 'text-green-800 font-medium' : 'text-gray-700'}>
-                                    {opt}
-                                  </span>
-                                  {isCorrect && (
-                                    <FiCheckCircle className="text-green-600 ml-auto flex-shrink-0" size={16} />
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
+                            return (
+                              <div
+                                key={option}
+                                className={`p-3 rounded-lg border-2 ${isCorrect
+                                    ? 'bg-green-50 border-green-300'
+                                    : 'bg-gray-50 border-gray-200'
+                                  }`}
+                              >
+                                <span className="font-semibold">{option}</span>
+                                {isCorrect && (
+                                  <FiCheckCircle className="inline ml-2 text-green-600" size={16} />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
 
-                        {/* Answer for True/False */}
-                        {q.type === "tf" && (
-                          <div className="mt-3 flex items-center gap-2 p-2 bg-green-100 border border-green-300 rounded text-sm">
-                            <FiCheckCircle className="text-green-600" size={16} />
-                            <span className="font-bold text-green-700">Answer:</span>
-                            <span className="text-green-800 font-medium">{q.answer}</span>
-                          </div>
-                        )}
+                      {/* Answer */}
+                      <div className="ml-20 flex items-center gap-2 text-green-700 font-semibold">
+                        <FiCheckCircle size={18} />
+                        <span>Correct Answer: {q.answer}</span>
                       </div>
                     </div>
                   </div>
@@ -248,40 +341,42 @@ export default function ParseQuestions() {
               })}
             </div>
 
-            {/* Submit Button */}
-            <div className="p-4 border-t border-gray-200" style={{ backgroundColor: '#f8faf8' }}>
+            {/* Bottom Submit Button */}
+            <div className="mt-6 flex justify-center">
               <button
                 onClick={handleSubmit}
                 disabled={selected.length === 0}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 text-white rounded-lg font-semibold transition-all shadow hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-8 py-4 text-white rounded-lg font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 style={{ backgroundColor: '#074F06' }}
                 onMouseEnter={(e) => {
-                  if (selected.length > 0) {
-                    e.target.style.backgroundColor = '#053d05';
-                  }
+                  if (!e.target.disabled) e.target.style.backgroundColor = '#053d05';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = '#074F06';
+                  if (!e.target.disabled) e.target.style.backgroundColor = '#074F06';
                 }}
               >
-                <FiCheckCircle size={20} />
+                <FiCheckCircle size={24} />
                 Submit {selected.length} Selected Question{selected.length !== 1 ? 's' : ''}
               </button>
             </div>
-          </div>
+          </>
         )}
 
         {/* Empty State */}
-        {questions.length === 0 && (
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-12 text-center">
-            <FiFileText size={64} className="mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">No Questions Loaded</h3>
-            <p className="text-sm text-gray-500">
-              Upload a JSON file to get started with creating your test
+        {questions.length === 0 && !uploading && (
+          <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+            <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4"
+              style={{ backgroundColor: '#D5F2D5' }}>
+              <FiAlertCircle size={40} style={{ color: '#074F06' }} />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No Questions Loaded
+            </h3>
+            <p className="text-gray-500">
+              Upload a JSON file to get started
             </p>
           </div>
         )}
-
       </div>
     </div>
   );

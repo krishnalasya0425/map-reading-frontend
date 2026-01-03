@@ -1,4 +1,3 @@
-
 import React from "react";
 import ForgotPassword from "../pages/ForgotPassword";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
@@ -11,38 +10,21 @@ import StudentDashboard from "../pages/StudentDashboard";
 import GenerateTest from "../components/GenerateTest";
 import Scoremodal from "../components/Scoremodal";
 import ClassWiseScore from "../components/ClassWiseScore";
+import TestReview from "../components/TestReview";
 
 const routesConfig = [
-  // ==================
-  // PUBLIC ROUTES
-  // ==================
   { path: '/forgotpassword', element: <ForgotPassword /> },
-
-  // ==================
-  // DASHBOARD ROUTES
-  // ==================
   { path: '/dashboard', element: <AdminDashboard />, roles: ['admin', 'Instructor'], label: 'Dashboard' },
   { path: '/student-dashboard', element: <StudentDashboard />, roles: ['Student'], label: 'Dashboard' },
-
-  // ==================
-  // CLASS ROUTES
-  // ==================
+  { path: '/as', element: <StudentDashboard />, roles: ['Student'] }, // Additional route 
   { path: '/classes', element: <Classes />, roles: ['admin', 'Instructor', 'Student'], label: 'Classes' },
   { path: '/:classId/docs', element: <Docs />, roles: ['admin', 'Instructor', 'Student'] },
   { path: '/:classId/generatetest', element: <GenerateTest />, roles: ['admin', 'Instructor'] },
-
-  // ==================
-  // TEST ROUTES
-  // ==================
   { path: '/test-maker', element: <TestMaker />, roles: ['admin', 'Instructor'], label: 'Test Maker' },
   { path: '/:testId/questions', element: <Test />, roles: ['Student'] },
   { path: '/:testId/review', element: <ClassWiseScore />, roles: ['admin', 'Instructor', 'Student'] },
-
-  // ==================
-  // SCORE ROUTES
-  // ==================
   { path: '/scores', element: <Scoremodal />, roles: ['admin', 'Instructor', 'Student'], label: 'Scores' },
+  { path: '/review/:test_set_id/:student_id', element: <TestReview />, roles: ['admin', 'Instructor', 'Student'] },
 ];
 
 export default routesConfig;
-

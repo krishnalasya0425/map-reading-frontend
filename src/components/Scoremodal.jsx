@@ -1,8 +1,23 @@
+
 import React, { useEffect, useState } from "react";
 import testAPI from "../entities/test";
 import Users from "../entities/users";
 import { useNavigate } from "react-router-dom";
-import { FiEdit, FiTrash2, FiArrowRight, FiPlus, FiFilter, FiFileText, FiCheckCircle } from "react-icons/fi";
+import {
+  FiEdit,
+  FiTrash2,
+  FiArrowRight,
+  FiPlus,
+  FiFilter,
+  FiFileText,
+  FiCheckCircle,
+  FiClock,
+  FiCalendar,
+  FiAward,
+  FiUsers,
+  FiDownload
+} from "react-icons/fi";
+import { FaClipboardList } from "react-icons/fa";
 import GenerateTest from "./GenerateTest";
 
 const TestManagement = () => {
@@ -14,13 +29,10 @@ const TestManagement = () => {
   const [tests, setTests] = useState([]);
   const [instructors, setInstructors] = useState([]);
   const [selectedInstructorId, setSelectedInstructorId] = useState("");
-
-  const [newTestName, setNewTestName] = useState("");
   const [editTestId, setEditTestId] = useState(null);
   const [editTestName, setEditTestName] = useState("");
   const [open, setOpen] = useState(false);
 
-  // Load tests on mount and when instructor filter changes
   useEffect(() => {
     loadTests();
   }, [selectedInstructorId]);
@@ -29,25 +41,17 @@ const TestManagement = () => {
     try {
       let data;
 
-      // ================= ADMIN =================
       if (role === "admin") {
         if (instructors.length === 0) {
           const inst = await Users.getByRole("Instructor");
           setInstructors(inst);
         }
-
         data = selectedInstructorId
           ? await testAPI.getAllTests(selectedInstructorId)
           : await testAPI.getAllTests();
-      }
-
-      // ================= STUDENT =================
-      else if (role === "Student") {
+      } else if (role === "Student") {
         data = await testAPI.getAllTests(userId, "Student");
-      }
-
-      // ================= INSTRUCTOR =================
-      else {
+      } else {
         data = await testAPI.getAllTests(userId);
       }
 
@@ -57,15 +61,6 @@ const TestManagement = () => {
     }
   };
 
-  // Add test (Instructor only)
-  const handleAddTest = async () => {
-    if (!newTestName.trim()) return;
-    await testAPI.addTest(newTestName, userId);
-    setNewTestName("");
-    loadTests();
-  };
-
-  // Delete test
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this test?")) {
       await testAPI.deleteTest(id);
@@ -73,7 +68,6 @@ const TestManagement = () => {
     }
   };
 
-  // Edit test
   const handleEdit = (id, name) => {
     setEditTestId(id);
     setEditTestName(name);
@@ -86,183 +80,353 @@ const TestManagement = () => {
     loadTests();
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-4">
-      <div className="max-w-5xl mx-auto space-y-4">
+  const cancelEdit = () => {
+    setEditTestId(null);
+    setEditTestName("");
+  };
 
-        {/* ================= HEADER ================= */}
-        <div className="bg-white rounded-lg shadow p-5 border border-gray-200">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 rounded-lg" style={{ backgroundColor: '#074F06' }}>
-              <FiFileText className="text-white" size={24} />
+  const formatDateTime = (date) => {
+    if (!date) return "-";
+    return new Date(date).toLocaleString();
+  };
+
+  return (
+    <div className="min-h-screen p-6">
+      <div className="max-w-7xl mx-auto">
+
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" style={{ color: '#074F06' }}>
+                Test Management
+              </h1>
+              <p className="text-gray-600">
+                {role === "admin" ? "Manage all tests across instructors" :
+                  role === "Instructor" ? "Create and manage your tests" :
+                    "View and take your assigned tests"}
+              </p>
             </div>
-            <h1 className="text-2xl font-bold" style={{ color: '#074F06' }}>Test Management</h1>
+
+            {role === "Instructor" && (
+              <button
+                onClick={() => setOpen(true)}
+                className="flex items-center gap-2 px-6 py-3 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                style={{ backgroundColor: '#074F06' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#053d05'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
+              >
+                <FiPlus size={20} />
+                Generate New Test
+              </button>
+            )}
           </div>
-          <p className="text-gray-600 text-sm ml-14">Manage and review all tests</p>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="p-4 rounded-xl shadow-md" style={{ backgroundColor: '#D5F2D5' }}>
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg" style={{ backgroundColor: '#074F06' }}>
+                  <FiFileText className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Tests</p>
+                  <p className="text-2xl font-bold" style={{ color: '#074F06' }}>{tests.length}</p>
+                </div>
+              </div>
+            </div>
+
+            {role === "admin" && (
+              <div className="p-4 rounded-xl shadow-md" style={{ backgroundColor: '#D5F2D5' }}>
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-lg" style={{ backgroundColor: '#074F06' }}>
+                    <FaClipboardList className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Instructors</p>
+                    <p className="text-2xl font-bold" style={{ color: '#074F06' }}>{instructors.length}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Admin Filter */}
+          {role === "admin" && (
+            <div
+              className="p-6 rounded-xl shadow-lg border"
+              style={{
+                backgroundColor: 'rgba(213, 242, 213, 0.8)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                borderColor: 'rgba(7, 79, 6, 0.2)',
+                boxShadow: '0 8px 24px rgba(7, 79, 6, 0.15)'
+              }}
+            >
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg" style={{ backgroundColor: '#074F06' }}>
+                    <FiFilter className="text-white" size={18} />
+                  </div>
+                  <div>
+                    <label className="font-bold text-base" style={{ color: '#074F06' }}>
+                      Filter by Instructor
+                    </label>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      View tests by specific instructor
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex-1 md:max-w-sm">
+                  <select
+                    className="w-full px-4 py-3 border-2 rounded-lg outline-none transition-all bg-white font-medium shadow-sm"
+                    style={{
+                      borderColor: '#074F06',
+                      color: '#074F06'
+                    }}
+                    value={selectedInstructorId}
+                    onChange={(e) => setSelectedInstructorId(e.target.value)}
+                    onFocus={(e) => {
+                      e.target.style.boxShadow = '0 0 0 3px rgba(7, 79, 6, 0.1)';
+                      e.target.style.borderColor = '#053d05';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.boxShadow = 'none';
+                      e.target.style.borderColor = '#074F06';
+                    }}
+                  >
+                    <option value="">All Instructors ({instructors.length})</option>
+                    {instructors.map((i) => (
+                      <option key={i.id} value={i.id}>
+                        {i.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* ================= ADMIN FILTER ================= */}
-        {role === "admin" && (
-          <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-            <div className="flex items-center gap-2 mb-3">
-              <FiFilter style={{ color: '#074F06' }} size={16} />
-              <label className="text-sm font-bold text-gray-800">Filter by Instructor</label>
+        {/* Tests Grid */}
+        {tests.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="inline-block p-6 rounded-full mb-4" style={{ backgroundColor: '#D5F2D5' }}>
+              <FiFileText size={48} style={{ color: '#074F06' }} />
             </div>
-            <select
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg outline-none bg-white text-gray-700 text-sm transition-all"
-              value={selectedInstructorId}
-              onChange={(e) => setSelectedInstructorId(e.target.value)}
-              onFocus={(e) => e.target.style.borderColor = '#074F06'}
-              onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-            >
-              <option value="">All Instructors</option>
-              {instructors.map((i) => (
-                <option key={i.id} value={i.id}>
-                  {i.name}
-                </option>
-              ))}
-            </select>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">No Tests Found</h3>
+            <p className="text-gray-500">
+              {role === "Instructor" ? "Create your first test to get started" : "No tests available yet"}
+            </p>
           </div>
-        )}
+        ) : (
+          <div className="space-y-4">
+            {tests.map((test, idx) => (
+              <div
+                key={test.id}
+                className="group rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border"
+                style={{
+                  backgroundColor: 'rgba(213, 242, 213, 0.7)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  borderColor: 'rgba(7, 79, 6, 0.2)',
+                  boxShadow: '0 8px 32px 0 rgba(7, 79, 6, 0.1)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#074F06';
+                  e.currentTarget.style.backgroundColor = 'rgba(213, 242, 213, 0.9)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(7, 79, 6, 0.2)';
+                  e.currentTarget.style.backgroundColor = 'rgba(213, 242, 213, 0.7)';
+                }}
+              >
+                <div className="p-6">
+                  {/* Test Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
+                        style={{ backgroundColor: '#074F06' }}>
+                        {idx + 1}
+                      </div>
 
-        {/* ================= INSTRUCTOR ADD TEST ================= */}
-        {role === "Instructor" && (
-          <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-            <button
-              onClick={() => setOpen(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 text-white rounded-lg font-semibold transition-all shadow hover:shadow-lg"
-              style={{ backgroundColor: '#074F06' }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#053d05'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
-            >
-              <FiPlus size={20} /> Generate New Test
-            </button>
+                      <div className="flex-1">
+                        {editTestId === test.id ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              value={editTestName}
+                              onChange={(e) => setEditTestName(e.target.value)}
+                              className="flex-1 px-3 py-2 border-2 rounded-lg outline-none"
+                              style={{ borderColor: '#074F06' }}
+                              autoFocus
+                            />
+                            <button
+                              onClick={handleUpdate}
+                              className="p-2 rounded-lg text-white transition-all"
+                              style={{ backgroundColor: '#074F06' }}
+                              title="Save"
+                            >
+                              <FiCheckCircle size={18} />
+                            </button>
+                            <button
+                              onClick={cancelEdit}
+                              className="p-2 bg-gray-400 rounded-lg text-white transition-all hover:bg-gray-500"
+                              title="Cancel"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <h3 className="text-xl font-bold text-gray-800 mb-1">
+                              {test.title || `${test.test_title} — ${test.set_name}`}
+                            </h3>
 
-            {open && <GenerateTest onClose={() => setOpen(false)} />}
-          </div>
-        )}
+                            {/* Class Name Badge */}
+                            {test.class_name && (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider mb-2"
+                                style={{ backgroundColor: '#074F06', color: 'white' }}>
+                                <FiUsers size={12} />
+                                {test.class_name}
+                              </div>
+                            )}
 
-        {/* ================= TEST LIST ================= */}
-        <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-          {/* Header */}
-          <div className="px-4 py-3 border-b border-gray-200" style={{ backgroundColor: '#f8faf8' }}>
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-gray-800">
-                {role === "Student" ? "My Tests" : "All Tests"} ({tests.length})
-              </h2>
-            </div>
-          </div>
+                            {/* Student Test Info */}
+                            {role === "Student" && test.exam_type && (
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-2">
+                                <div className="flex items-center gap-1">
+                                  <FiFileText size={14} />
+                                  <span>{test.total_questions} Questions</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <FiClock size={14} />
+                                  <span>{test.exam_type}</span>
+                                </div>
+                                {test.exam_type === "TIMED" && (
+                                  <div className="flex items-center gap-1">
+                                    <FiClock size={14} />
+                                    <span>{test.duration_minutes} mins</span>
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-1">
+                                  <FiAward size={14} />
+                                  <span>Pass: {test.pass_threshold} Score</span>
+                                </div>
+                              </div>
+                            )}
 
-          {/* Test List */}
-          <div className="divide-y divide-gray-100">
-            {tests.length === 0 ? (
-              <div className="p-10 text-center text-gray-500">
-                <FiFileText size={48} className="mx-auto mb-3 text-gray-300" />
-                <p className="font-medium">No tests available</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  {role === "Instructor" ? "Click 'Generate New Test' to create one" : "Tests will appear here when assigned"}
-                </p>
-              </div>
-            ) : (
-              tests.map((test, idx) => (
-                <div
-                  key={test.id}
-                  className="p-4 hover:bg-green-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    {/* Left: Test Info */}
-                    <div className="flex items-center gap-3 flex-1">
-                      <span className="text-gray-500 font-semibold text-sm w-8">{idx + 1}.</span>
-
-                      {editTestId === test.id ? (
-                        <input
-                          value={editTestName}
-                          onChange={(e) => setEditTestName(e.target.value)}
-                          className="flex-1 px-3 py-1.5 border-2 rounded-lg outline-none text-sm"
-                          style={{ borderColor: '#074F06' }}
-                          autoFocus
-                        />
-                      ) : (
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-800">{test.title}</h3>
-                          {test.class_name && (
-                            <p className="text-xs text-gray-500 mt-0.5">Class: {test.class_name}</p>
-                          )}
-                        </div>
-                      )}
+                            {/* Fixed Time Info */}
+                            {role === "Student" && test.exam_type === "FIXED_TIME" && (
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-2">
+                                <div className="flex items-center gap-1">
+                                  <FiCalendar size={14} />
+                                  <span>Start: {formatDateTime(test.start_time)}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <FiCalendar size={14} />
+                                  <span>End: {formatDateTime(test.end_time)}</span>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Right: Actions */}
+                    {/* Action Buttons */}
                     <div className="flex items-center gap-2">
-                      {/* Student View */}
+                      {/* Student Actions */}
                       {role === "Student" && (
                         <>
                           {test.score === null ? (
                             <button
-                              onClick={() => navigate(`/${test.id}/questions`)}
-                              className="flex items-center gap-2 px-4 py-2 text-white rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow"
+                              onClick={() => navigate(`/${test.test_set_id}/questions`)}
+                              className="flex items-center gap-2 px-4 py-2 text-white rounded-lg font-medium transition-all transform hover:scale-105"
                               style={{ backgroundColor: '#074F06' }}
                               onMouseEnter={(e) => e.target.style.backgroundColor = '#053d05'}
                               onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
                             >
-                              <FiArrowRight size={16} /> Start Test
+                              <FiArrowRight size={18} />
+                              <span>Start Exam</span>
                             </button>
                           ) : (
-                            <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-bold border border-green-300">
-                              <FiCheckCircle size={16} />
-                              Score: {test.score} / {test.total_questions}
+                            <div className="flex items-center gap-3">
+                              <div className="px-4 py-2 rounded-lg font-semibold" style={{ backgroundColor: '#D5F2D5', color: '#074F06' }}>
+                                Score: {test.score} / {test.total_questions}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/score/download/${test.test_set_id}/${userId}`, "_blank")}
+                                  className="flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all bg-white hover:shadow-md"
+                                  style={{ color: '#074F06', border: '1px solid #074F06' }}
+                                  title="Download Result PDF"
+                                >
+                                  <FiDownload size={16} />
+                                  <span className="hidden sm:inline">PDF</span>
+                                </button>
+                                <button
+                                  onClick={() => navigate(`/review/${test.test_set_id}/${userId}`)}
+                                  className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all hover:bg-white"
+                                  style={{ color: '#074F06' }}
+                                  title="View Questions"
+                                >
+                                  <FiArrowRight size={18} />
+                                  <span>Review</span>
+                                </button>
+                              </div>
                             </div>
                           )}
                         </>
                       )}
 
-                      {/* Admin/Instructor View */}
+                      {/* Instructor/Admin Actions */}
                       {role !== "Student" && (
                         <>
-                          <button
-                            onClick={() => navigate(`/${test.id}/review`)}
-                            className="p-2 rounded-lg transition-all hover:bg-green-100"
-                            style={{ color: '#074F06' }}
-                            title="View Scores"
-                          >
-                            <FiArrowRight size={20} />
-                          </button>
+                          {editTestId !== test.id && (
+                            <>
+                              <button
+                                onClick={() => navigate(`/${test.id}/review`)}
+                                className="flex items-center gap-2 px-4 py-2 text-white rounded-lg font-medium transition-all transform hover:scale-105"
+                                style={{ backgroundColor: '#074F06' }}
+                                onMouseEnter={(e) => e.target.style.backgroundColor = '#053d05'}
+                                onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
+                                title="View Test"
+                              >
+                                <FiArrowRight size={18} />
+                                <span>Open</span>
+                              </button>
 
-                          {editTestId === test.id ? (
-                            <button
-                              onClick={handleUpdate}
-                              className="p-2 rounded-lg transition-all hover:bg-green-100"
-                              style={{ color: '#074F06' }}
-                              title="Save"
-                            >
-                              <FiCheckCircle size={20} />
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleEdit(test.id, test.title)}
-                              className="p-2 text-blue-600 rounded-lg transition-all hover:bg-blue-50"
-                              title="Edit"
-                            >
-                              <FiEdit size={18} />
-                            </button>
+                              <button
+                                onClick={() => handleEdit(test.id, test.title)}
+                                className="p-2 rounded-lg transition-all hover:bg-white"
+                                style={{ color: '#074F06' }}
+                                title="Edit"
+                              >
+                                <FiEdit size={18} />
+                              </button>
+
+                              <button
+                                onClick={() => handleDelete(test.id)}
+                                className="p-2 text-red-600 rounded-lg transition-all hover:bg-white"
+                                title="Delete"
+                              >
+                                <FiTrash2 size={18} />
+                              </button>
+                            </>
                           )}
-
-                          <button
-                            onClick={() => handleDelete(test.id)}
-                            className="p-2 text-red-600 rounded-lg transition-all hover:bg-red-50"
-                            title="Delete"
-                          >
-                            <FiTrash2 size={18} />
-                          </button>
                         </>
                       )}
                     </div>
                   </div>
                 </div>
-              ))
-            )}
+              </div>
+            ))}
           </div>
-        </div>
+        )}
+
+        {/* Generate Test Modal */}
+        {open && <GenerateTest onClose={() => setOpen(false)} />}
       </div>
     </div>
   );

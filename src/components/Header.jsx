@@ -1,10 +1,9 @@
-
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import RouteConfig from "../routes/RouteConfig";
-import { useAuth } from "../context/AuthContext";
-import { FiLogOut } from "react-icons/fi";
 import { FaUserCircle } from "react-icons/fa";
+import { FiLogOut } from "react-icons/fi";
+import { useAuth } from "../context/AuthContext";
+import routeConfig from "../routes/RouteConfig";
 
 export default function Header({ role: propRole }) {
     const location = useLocation();
@@ -20,12 +19,15 @@ export default function Header({ role: propRole }) {
         navigate("/login");
     };
 
-    // Helper: Capitalize path for display
-    const capitalize = (str) =>
-        str.charAt(0).toUpperCase() + str.slice(1);
+    // Helper: Get display label for route
+    const getRouteLabel = (route) => {
+        if (route.label) return route.label;
+        const pathName = route.path.replace("/", "") || "Dashboard";
+        return pathName.charAt(0).toUpperCase() + pathName.slice(1);
+    };
 
-    // Filter routes based on role and exclude dynamic paths
-    const filteredRoutes = RouteConfig.filter(
+    // Filter routes based on role
+    const filteredRoutes = routeConfig.filter(
         (r) => !r.roles || r.roles.includes(role)
     );
 
@@ -40,78 +42,99 @@ export default function Header({ role: propRole }) {
         "/:testId/review"
     ];
 
+    // Filter navigation items
+    const navRoutes = filteredRoutes.filter((r) => {
+        // Exclude dynamic paths
+        if (excludedPaths.includes(r.path)) return false;
+        // Exclude routes without labels
+        if (!r.label && r.path !== '/forgotpassword') return false;
+
+        // For students, hide Classes and Scores from navbar
+        if (role === 'Student') {
+            if (r.path === '/classes' || r.path === '/scores') {
+                return false;
+            }
+        }
+
+        return true;
+    });
+
     return (
         <header className="w-full text-white shadow-lg" style={{ backgroundColor: '#074F06' }}>
-            <div className="max-w-full mx-auto flex items-center justify-between px-6 py-3">
+            <div className="max-w-full mx-auto flex items-center justify-between px-6 py-3.5">
 
-                {/* LEFT SIDE: MAP READING */}
-                <div className="flex items-center gap-2">
-                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="20" cy="20" r="20" fill="white" />
-                        <path d="M20 10C16.134 10 13 13.134 13 17C13 22.25 20 30 20 30C20 30 27 22.25 27 17C27 13.134 23.866 10 20 10ZM20 19.5C18.619 19.5 17.5 18.381 17.5 17C17.5 15.619 18.619 14.5 20 14.5C21.381 14.5 22.5 15.619 22.5 17C22.5 18.381 21.381 19.5 20 19.5Z" fill="#074F06" />
-                    </svg>
-                    <span className="font-bold text-xl">Map Reading</span>
-                </div>
-
-                {/* CENTER: NAV LINKS */}
-                <nav className="flex items-center gap-2">
-                    {filteredRoutes
-                        .filter((r) => {
-                            // Exclude dynamic paths
-                            if (excludedPaths.includes(r.path)) return false;
-                            // Exclude routes without labels
-                            if (!r.label && r.path !== '/forgotpassword') return false;
-
-                            // For students, hide Classes and Scores from navbar
-                            if (role === 'Student') {
-                                if (r.path === '/classes' || r.path === '/scores') {
-                                    return false;
-                                }
-                            }
-
-                            return true;
-                        })
-                        .map((r, idx) => {
-                            const isActive = location.pathname === r.path;
-                            // Use explicit label or capitalize the path
-                            const label = r.label || capitalize(r.path.replace("/", "") || "Dashboard");
-
-                            return (
-                                <Link
-                                    key={idx}
-                                    to={r.path}
-                                    className={`text-sm font-medium px-4 py-2 rounded-lg transition-all duration-200 ${isActive
-                                        ? "bg-white font-semibold shadow-md nav-link-active"
-                                        : "nav-link-inactive hover:shadow-md"
-                                        }`}
-                                    style={{ textDecoration: 'none' }}
-                                >
-                                    {label}
-                                </Link>
-                            );
-                        })}
-                </nav>
-
-                {/* RIGHT SIDE: USERNAME + LOGOUT */}
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: '#074F06' }}>
-                        <FaUserCircle size={20} className="text-white" />
-                        <span className="text-sm font-medium text-white">{username}</span>
+                {/* LEFT SIDE: LOGO & BRAND */}
+                <div className="flex items-center gap-3">
+                    {/* Logo Icon */}
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white bg-opacity-10 backdrop-blur-sm">
+                        <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="20" cy="20" r="20" fill="white" />
+                            <path d="M20 10C16.134 10 13 13.134 13 17C13 22.25 20 30 20 30C20 30 27 22.25 27 17C27 13.134 23.866 10 20 10ZM20 19.5C18.619 19.5 17.5 18.381 17.5 17C17.5 15.619 18.619 14.5 20 14.5C21.381 14.5 22.5 15.619 22.5 17C22.5 18.381 21.381 19.5 20 19.5Z" fill="#074F06" />
+                        </svg>
                     </div>
 
+                    {/* Brand Name */}
+                    <div className="flex flex-col">
+                        <span className="font-bold text-xl leading-tight">Map Reading</span>
+                        <span className="text-xs text-white text-opacity-80 leading-tight">Training Platform</span>
+                    </div>
+                </div>
+
+                {/* CENTER: NAVIGATION */}
+                <nav className="flex items-center gap-2">
+                    {navRoutes.map((r, idx) => {
+                        const isActive = location.pathname === r.path;
+                        const label = getRouteLabel(r);
+
+                        return (
+                            <Link
+                                key={idx}
+                                to={r.path}
+                                className={`text-sm font-medium px-5 py-2.5 rounded-lg transition-all duration-200 ${isActive
+                                    ? "bg-white font-bold shadow-md nav-link-active"
+                                    : "nav-link-inactive hover:bg-white hover:bg-opacity-10"
+                                    }`}
+                                style={{
+                                    textDecoration: 'none',
+                                    color: isActive ? '#074F06' : 'white'
+                                }}
+                            >
+                                {label}
+                            </Link>
+                        );
+                    })}
+                </nav>
+
+                {/* RIGHT SIDE: USER PROFILE + LOGOUT */}
+                <div className="flex items-center gap-4">
+                    {/* User Profile Badge */}
+                    <div
+                        className="flex items-center gap-3 px-4 py-1.5 rounded-xl backdrop-blur-md border border-white/30 shadow-sm"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                    >
+                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-lg transform transition-transform hover:scale-105">
+                            <FaUserCircle size={24} style={{ color: '#074F06' }} />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-sm font-bold leading-tight tracking-tight">{username}</span>
+                            <span className="text-[10px] text-white/80 leading-tight uppercase font-black tracking-widest">{role}</span>
+                        </div>
+                    </div>
+
+                    {/* Logout Button */}
                     <button
                         onClick={handleLogout}
-                        className="flex items-center gap-2 text-sm bg-white px-4 py-2 rounded-lg transition-all font-medium shadow-sm hover:shadow-md"
+                        className="flex items-center gap-2 text-sm bg-white px-4 py-2.5 rounded-lg transition-all font-semibold shadow-sm hover:shadow-md group"
                         style={{ color: '#074F06' }}
                         onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = '#D5F2D5';
+                            e.currentTarget.style.backgroundColor = '#D5F2D5';
                         }}
                         onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = 'white';
+                            e.currentTarget.style.backgroundColor = 'white';
                         }}
                     >
-                        <FiLogOut size={18} />
-                        Logout
+                        <FiLogOut size={18} className="transition-transform group-hover:translate-x-0.5" />
+                        <span>Logout</span>
                     </button>
                 </div>
             </div>

@@ -11,6 +11,8 @@ import {
   FiAlertCircle,
   FiUsers,
   FiFileText,
+  FiDownload,
+  FiEye,
 } from "react-icons/fi";
 import { FaGraduationCap, FaPencilAlt } from "react-icons/fa";
 
@@ -18,6 +20,7 @@ export default function StudentDashboard() {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [tests, setTests] = useState([]);
+  const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const studentId = localStorage.getItem("id");
   const studentName = localStorage.getItem("name");
@@ -39,11 +42,15 @@ export default function StudentDashboard() {
       // Transform the data to match the UI requirements
       const transformedTests = (testsData || []).map(test => ({
         id: test.id,
-        title: test.title,
+        test_set_id: test.test_set_id,
+        title: test.title || test.test_title,
         status: test.score !== null ? "completed" : "available",
-        // duration: "30 min", // You can add this to backend if needed
-        questions: test.total_questions || 0,
-        score: test.score ? Math.round((test.score / test.total_questions) * 100) : null
+        score: test.score !== null ? test.score : null,
+        total_questions: test.total_questions || 0,
+        exam_type: test.exam_type,
+        duration: test.duration_minutes,
+        start_time: test.start_time,
+        end_time: test.end_time
       }));
 
       setTests(transformedTests);
@@ -59,9 +66,9 @@ export default function StudentDashboard() {
     navigate(`/${classId}/docs`);
   };
 
-  const handleTestClick = (testId, status) => {
+  const handleTestClick = (testId, testSetId, status) => {
     if (status === "available" || status === "in-progress") {
-      navigate(`/${testId}/questions`);
+      navigate(`/${testSetId || testId}/questions`);
     }
   };
 
@@ -208,153 +215,244 @@ export default function StudentDashboard() {
 
           {/* RIGHT SIDE - TESTS */}
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h2 className="text-2xl font-bold flex items-center gap-2" style={{ color: '#074F06' }}>
                 <FiClipboard size={28} />
                 Available Tests
               </h2>
-              <span className="px-3 py-1 rounded-full text-sm font-semibold" style={{ backgroundColor: '#D5F2D5', color: '#074F06' }}>
-                {tests.length} {tests.length === 1 ? 'test' : 'tests'}
-              </span>
+              <div className="flex items-center gap-3">
+                <select
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  className="px-3 py-1.5 rounded-lg text-sm font-semibold border-2 outline-none cursor-pointer transition-all"
+                  style={{
+                    borderColor: '#074F06',
+                    color: '#074F06',
+                    backgroundColor: 'white'
+                  }}
+                >
+                  <option value="all">All Tests</option>
+                  <option value="completed">Completed</option>
+                  <option value="unattempted">Unattempted</option>
+                </select>
+                <span className="px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap" style={{ backgroundColor: '#D5F2D5', color: '#074F06' }}>
+                  {tests.filter(t => {
+                    if (filter === "completed") return t.status === "completed";
+                    if (filter === "unattempted") return t.status !== "completed";
+                    return true;
+                  }).length} results
+                </span>
+              </div>
             </div>
 
-            {tests.length === 0 ? (
+            {tests.filter(t => {
+              if (filter === "completed") return t.status === "completed";
+              if (filter === "unattempted") return t.status !== "completed";
+              return true;
+            }).length === 0 ? (
               <div className="bg-white rounded-xl shadow-md p-8 text-center border border-gray-200">
                 <FiAlertCircle className="mx-auto mb-4 text-gray-400" size={48} />
                 <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                  No Tests Available
+                  No {filter !== "all" ? filter : ""} Tests Found
                 </h3>
                 <p className="text-gray-600">
-                  There are no tests available at the moment. Check back later.
+                  {filter === "completed"
+                    ? "You haven't completed any tests yet."
+                    : filter === "unattempted"
+                      ? "Great job! You have no pending tests."
+                      : "There are no tests available at the moment."}
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
-                {tests.map((test) => (
-                  <div
-                    key={test.id}
-                    className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-200 overflow-hidden border border-gray-200 ${test.status === "available" || test.status === "in-progress"
-                      ? "cursor-pointer group"
-                      : "opacity-90"
-                      }`}
-                    onClick={() => handleTestClick(test.id, test.status)}
-                  >
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-xl font-bold text-gray-800 transition-colors"
-                              style={{ color: 'inherit' }}
-                              onMouseEnter={(e) => test.status !== "completed" && (e.target.style.color = '#074F06')}
-                              onMouseLeave={(e) => e.target.style.color = 'inherit'}
-                            >
-                              {test.title}
-                            </h3>
-                            {test.status === "completed" && (
-                              <FiCheckCircle style={{ color: '#074F06' }} size={20} />
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                            <div className="flex items-center gap-1">
-                              {/* <FiClock size={14} /> */}
-                              <span>{test.duration}</span>
+                {tests
+                  .filter(t => {
+                    if (filter === "completed") return t.status === "completed";
+                    if (filter === "unattempted") return t.status !== "completed";
+                    return true;
+                  })
+                  .map((test) => (
+                    <div
+                      key={test.id}
+                      className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-200 overflow-hidden border border-gray-200 ${test.status === "available" || test.status === "in-progress"
+                        ? "cursor-pointer group"
+                        : "opacity-90"
+                        }`}
+                      onClick={() => handleTestClick(test.id, test.test_set_id, test.status)}
+                    >
+                      <div className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="text-xl font-bold text-gray-800 transition-colors"
+                                style={{ color: 'inherit' }}
+                                onMouseEnter={(e) => test.status !== "completed" && (e.target.style.color = '#074F06')}
+                                onMouseLeave={(e) => e.target.style.color = 'inherit'}
+                              >
+                                {test.title}
+                              </h3>
+                              {test.status === "completed" && (
+                                <FiCheckCircle style={{ color: '#074F06' }} size={20} />
+                              )}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <FiFileText size={14} />
-                              <span>{test.questions} questions</span>
-                            </div>
-                          </div>
 
-                          {/* Status Badge */}
-                          <div className="flex items-center gap-2">
-                            {test.status === "available" && (
-                              <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#D5F2D5', color: '#074F06' }}>
-                                Available
-                              </span>
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 mb-3">
+                              <div className="flex items-center gap-1">
+                                <FiFileText size={14} />
+                                <span>{test.total_questions} questions</span>
+                              </div>
+
+                              {test.exam_type && (
+                                <div className="flex items-center gap-1 font-bold" style={{ color: '#074F06' }}>
+                                  <FiClock size={14} />
+                                  <span>{test.exam_type.replace('_', ' ')}</span>
+                                </div>
+                              )}
+
+                              {test.exam_type === "TIMED" && test.duration && (
+                                <div className="flex items-center gap-1">
+                                  <FiClock size={14} />
+                                  <span>{test.duration} mins</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {test.exam_type === "FIXED_TIME" && (
+                              <div className="flex flex-col gap-1 text-[11px] text-gray-500 mb-3 bg-gray-50 p-2 rounded border border-gray-100">
+                                <div className="flex justify-between">
+                                  <span className="font-bold">Starts:</span>
+                                  <span>{new Date(test.start_time).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="font-bold">Ends:</span>
+                                  <span>{new Date(test.end_time).toLocaleString()}</span>
+                                </div>
+                              </div>
                             )}
-                            {test.status === "in-progress" && (
-                              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
-                                In Progress
-                              </span>
-                            )}
-                            {test.status === "completed" && (
-                              <>
+
+                            {/* Status Badge */}
+                            <div className="flex items-center gap-2">
+                              {test.status === "available" && (
                                 <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#D5F2D5', color: '#074F06' }}>
-                                  Completed
+                                  Available
                                 </span>
-                                <span className="text-sm font-bold" style={{ color: '#074F06' }}>
-                                  Score: {test.score}%
+                              )}
+                              {test.status === "in-progress" && (
+                                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
+                                  In Progress
                                 </span>
-                              </>
-                            )}
+                              )}
+                              {test.status === "completed" && (
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#D5F2D5', color: '#074F06' }}>
+                                      Completed
+                                    </span>
+                                    <span className="text-sm font-bold" style={{ color: '#074F06' }}>
+                                      Score: {test.score} / {test.total_questions}
+                                    </span>
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/review/${test.test_set_id}/${studentId}`);
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all border shadow-sm hover:shadow-md hover:bg-gray-50"
+                                    style={{
+                                      backgroundColor: 'white',
+                                      color: '#074F06',
+                                      borderColor: '#074F06'
+                                    }}
+                                  >
+                                    <FiEye size={14} />
+                                    View Result
+                                  </button>
+
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/score/download/${test.test_set_id}/${studentId}`, "_blank");
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all border shadow-sm hover:shadow-md hover:bg-gray-50"
+                                    style={{
+                                      backgroundColor: 'white',
+                                      color: '#074F06',
+                                      borderColor: '#074F06'
+                                    }}
+                                    title="Download Performance Report"
+                                  >
+                                    <FiDownload size={14} />
+                                    Download Result
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </div>
+
+                          {(test.status === "available" || test.status === "in-progress") && (
+                            <FiArrowRight
+                              className="text-gray-400 transition-all"
+                              style={{ transition: 'all 0.2s ease' }}
+                              onMouseEnter={(e) => {
+                                e.target.style.color = '#074F06';
+                                e.target.style.transform = 'translateX(4px)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.color = '#9ca3af';
+                                e.target.style.transform = 'translateX(0)';
+                              }}
+                              size={24}
+                            />
+                          )}
                         </div>
 
-                        {(test.status === "available" || test.status === "in-progress") && (
-                          <FiArrowRight
-                            className="text-gray-400 transition-all"
-                            style={{ transition: 'all 0.2s ease' }}
-                            onMouseEnter={(e) => {
-                              e.target.style.color = '#074F06';
-                              e.target.style.transform = 'translateX(4px)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.color = '#9ca3af';
-                              e.target.style.transform = 'translateX(0)';
-                            }}
-                            size={24}
-                          />
+                        {/* Action Button */}
+                        {test.status === "available" && (
+                          <button
+                            className="w-full mt-4 py-2 px-4 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+                            style={{ backgroundColor: '#074F06' }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#053d05'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
+                          >
+                            <FaPencilAlt size={16} />
+                            Start Test
+                          </button>
+                        )}
+                        {test.status === "in-progress" && (
+                          <button
+                            className="w-full mt-4 py-2 px-4 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+                            style={{ backgroundColor: '#f59e0b' }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#d97706'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#f59e0b'}
+                          >
+                            <FaPencilAlt size={16} />
+                            Continue Test
+                          </button>
                         )}
                       </div>
 
-                      {/* Action Button */}
-                      {test.status === "available" && (
-                        <button
-                          className="w-full mt-4 py-2 px-4 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
-                          style={{ backgroundColor: '#074F06' }}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = '#053d05'}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
-                        >
-                          <FaPencilAlt size={16} />
-                          Start Test
-                        </button>
-                      )}
-                      {test.status === "in-progress" && (
-                        <button
-                          className="w-full mt-4 py-2 px-4 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
-                          style={{ backgroundColor: '#f59e0b' }}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = '#d97706'}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = '#f59e0b'}
-                        >
-                          <FaPencilAlt size={16} />
-                          Continue Test
-                        </button>
-                      )}
+                      <div
+                        className="h-1 w-full transition-colors"
+                        style={{
+                          backgroundColor: test.status === "completed"
+                            ? "#074F06"
+                            : test.status === "in-progress"
+                              ? "#f59e0b"
+                              : "#D5F2D5"
+                        }}
+                        onMouseEnter={(e) => {
+                          if (test.status === "available") {
+                            e.target.style.backgroundColor = '#074F06';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (test.status === "available") {
+                            e.target.style.backgroundColor = '#D5F2D5';
+                          }
+                        }}
+                      ></div>
                     </div>
-
-                    <div
-                      className="h-1 w-full transition-colors"
-                      style={{
-                        backgroundColor: test.status === "completed"
-                          ? "#074F06"
-                          : test.status === "in-progress"
-                            ? "#f59e0b"
-                            : "#D5F2D5"
-                      }}
-                      onMouseEnter={(e) => {
-                        if (test.status === "available") {
-                          e.target.style.backgroundColor = '#074F06';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (test.status === "available") {
-                          e.target.style.backgroundColor = '#D5F2D5';
-                        }
-                      }}
-                    ></div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>
