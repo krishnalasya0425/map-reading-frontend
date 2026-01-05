@@ -81,6 +81,33 @@ const Docs = () => {
     }
   };
 
+  // Launch Exercise Build (Class-specific)
+  const launchExercise = async () => {
+    const instructorId = localStorage.getItem("id");
+
+    setLaunchMode("exercise");
+    setShowLaunchModal(true);
+
+    try {
+      const url = `http://localhost:5000/unity/exercise/${classId}/${instructorId}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      console.log("Exercise build launched:", data.message);
+    } catch (err) {
+      console.error(err);
+      setShowLaunchModal(false);
+      alert("Failed to launch Exercise build");
+    }
+  };
+
+
   const loadAvailableStudents = async () => {
     try {
       setLoadingStudents(true);
@@ -336,6 +363,20 @@ const Docs = () => {
                 <span className="hidden sm:inline">Practice </span>
               </button>
             </div>
+
+        
+            <button
+  className="flex items-center gap-2 px-5 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+  style={{ backgroundColor: '#f59e0b', color: 'white' }}
+  onMouseEnter={(e) => e.target.style.backgroundColor = '#d97706'}
+  onMouseLeave={(e) => e.target.style.backgroundColor = '#f59e0b'}
+  onClick={launchExercise}
+>
+  <FaClipboardList size={18} />
+  <span className="hidden sm:inline">Exercise</span>
+</button>
+
+
           </div>
 
           {/* View Mode Toggle and Stats */}

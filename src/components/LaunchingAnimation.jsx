@@ -2,30 +2,30 @@ import React, { useState, useEffect } from "react";
 import { FiX, FiCheck, FiCheckCircle } from "react-icons/fi";
 
 const LaunchingAnimation = ({ isOpen, onClose, mode = "practice" }) => {
+
     // Stages: animation -> readiness -> success (for VR mode)
     // Stages: loading -> success (for practice mode)
     const [stage, setStage] = useState("animation");
     const [animationEnded, setAnimationEnded] = useState(false);
 
-    useEffect(() => {
-        if (!isOpen) {
-            setStage(mode === "vr" ? "animation" : "loading");
-            setAnimationEnded(false);
-            return;
-        }
+   useEffect(() => {
+    if (!isOpen) {
+        setStage(mode === "vr" ? "animation" : "loading");
+        setAnimationEnded(false);
+        return;
+    }
 
-        // For VR mode, show animation -> readiness -> success
-        if (mode === "vr") {
-            setStage("animation");
-        } else {
-            // For practice mode, use original loading behavior
-            setStage("loading");
-            const timer = setTimeout(() => {
-                setStage("success");
-            }, 2000);
-            return () => clearTimeout(timer);
-        }
-    }, [isOpen, mode]);
+    if (mode === "vr") {
+        setStage("animation");
+    } else {
+        setStage("loading");
+        const timer = setTimeout(() => {
+            setStage("success");
+        }, 2000);
+        return () => clearTimeout(timer);
+    }
+}, [isOpen, mode]);
+
 
     const handleAnimationEnd = () => {
         setAnimationEnded(true);
@@ -42,7 +42,13 @@ const LaunchingAnimation = ({ isOpen, onClose, mode = "practice" }) => {
 
     if (!isOpen) return null;
 
-    const title = mode === "vr" ? "VR Practice" : "Practice";
+    const title =
+    mode === "vr"
+        ? "VR Practice"
+        : mode === "exercise"
+        ? "Exercise"
+        : "Practice";
+
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-fadeIn">
@@ -222,8 +228,11 @@ const LaunchingAnimation = ({ isOpen, onClose, mode = "practice" }) => {
                                 </div>
                             </div>
                             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                                Launching {title}
-                            </h2>
+    {mode === "vr" && "Launching VR Practice"}
+    {mode === "practice" && "Launching Practice"}
+    {mode === "exercise" && "Launching Exercise"}
+</h2>
+
                             <p className="text-gray-600 mb-6">
                                 Preparing your session...
                             </p>
@@ -247,8 +256,16 @@ const LaunchingAnimation = ({ isOpen, onClose, mode = "practice" }) => {
 
                             {/* Success Title */}
                             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                                {mode === "vr" ? "VR Practice Launched Successfully!" : "Practice Launched Successfully!"}
-                            </h2>
+    {mode === "vr" && "VR Practice Launched Successfully!"}
+    {mode === "practice" && "Practice Launched Successfully!"}
+    {mode === "exercise" && "Exercise Launched Successfully!"}
+</h2>
+<p className="font-medium">
+    {mode === "vr" && "VR application is now running"}
+    {mode === "practice" && "Practice session is now running"}
+    {mode === "exercise" && "Exercise session is now running"}
+</p>
+
 
                             {/* Success Message */}
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
