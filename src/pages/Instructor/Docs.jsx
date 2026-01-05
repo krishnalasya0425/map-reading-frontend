@@ -32,6 +32,7 @@ const Docs = () => {
   const [uploadDoc, setUploadDoc] = useState(false);
   const [previewId, setPreviewId] = useState(null);
   const [viewMode, setViewMode] = useState("grid"); // grid or list
+  const [activeFilter, setActiveFilter] = useState("all"); // all, pdf, image
 
   // Student management states
   const [showAddStudentsModal, setShowAddStudentsModal] = useState(false);
@@ -380,13 +381,19 @@ const Docs = () => {
               WebkitBackdropFilter: 'blur(10px)'
             }}>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: 'white' }}>
+              <div
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${activeFilter === 'pdf' ? 'ring-2 ring-red-500 bg-red-50' : 'bg-white'}`}
+                onClick={() => setActiveFilter(activeFilter === 'pdf' ? 'all' : 'pdf')}
+              >
                 <FaFilePdf className="text-red-500" size={20} />
                 <span className="font-semibold" style={{ color: '#074F06' }}>
                   {docs.filter(d => d.file_type?.includes('pdf')).length} PDFs
                 </span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: 'white' }}>
+              <div
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${activeFilter === 'image' ? 'ring-2 ring-blue-500 bg-blue-50' : 'bg-white'}`}
+                onClick={() => setActiveFilter(activeFilter === 'image' ? 'all' : 'image')}
+              >
                 <FaFileImage className="text-blue-500" size={20} />
                 <span className="font-semibold" style={{ color: '#074F06' }}>
                   {docs.filter(d => d.file_type?.startsWith('image')).length} Images
@@ -451,123 +458,135 @@ const Docs = () => {
             {/* Grid View */}
             {viewMode === 'grid' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {docs.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="group cursor-pointer rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border relative"
-                    style={{
-                      backgroundColor: 'rgba(159, 207, 159, 0.7)',
-                      backdropFilter: 'blur(10px)',
-                      WebkitBackdropFilter: 'blur(10px)',
-                      borderColor: 'rgba(7, 79, 6, 0.2)',
-                      boxShadow: '0 8px 32px 0 rgba(7, 79, 6, 0.1)'
-                    }}
-                    onClick={() => {
-                      if (doc.file_type.includes("pdf") || doc.file_type.startsWith("image")) {
-                        setPreviewId(doc.id);
-                        setDocType(doc.file_type);
-                      }
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#074F06';
-                      e.currentTarget.style.transform = 'translateY(-4px)';
-                      e.currentTarget.style.backgroundColor = 'rgba(159, 207, 159, 0.9)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(7, 79, 6, 0.2)';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.backgroundColor = 'rgba(159, 207, 159, 0.7)';
-                    }}
-                  >
-                    {/* Delete Button - Only for non-students */}
-                    {role !== "Student" && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent card click
-                          handleDeleteDoc(doc.id, doc.doc_title);
-                        }}
-                        className="absolute top-3 right-3 z-10 p-2 rounded-lg bg-white hover:bg-red-50 shadow-md transition-all opacity-0 group-hover:opacity-100"
-                        style={{ color: '#dc2626' }}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = '#fee2e2';
-                          e.target.style.transform = 'scale(1.1)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = 'white';
-                          e.target.style.transform = 'scale(1)';
-                        }}
-                        title="Delete document"
-                      >
-                        <FaTrash size={16} />
-                      </button>
-                    )}
+                {docs
+                  .filter(doc => {
+                    if (activeFilter === 'pdf') return doc.file_type?.includes('pdf');
+                    if (activeFilter === 'image') return doc.file_type?.startsWith('image');
+                    return true;
+                  })
+                  .map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="group cursor-pointer rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border relative"
+                      style={{
+                        backgroundColor: 'rgba(159, 207, 159, 0.7)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        borderColor: 'rgba(7, 79, 6, 0.2)',
+                        boxShadow: '0 8px 32px 0 rgba(7, 79, 6, 0.1)'
+                      }}
+                      onClick={() => {
+                        if (doc.file_type.includes("pdf") || doc.file_type.startsWith("image")) {
+                          setPreviewId(doc.id);
+                          setDocType(doc.file_type);
+                        }
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#074F06';
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                        e.currentTarget.style.backgroundColor = 'rgba(159, 207, 159, 0.9)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(7, 79, 6, 0.2)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.backgroundColor = 'rgba(159, 207, 159, 0.7)';
+                      }}
+                    >
+                      {/* Delete Button - Only for non-students */}
+                      {role !== "Student" && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent card click
+                            handleDeleteDoc(doc.id, doc.doc_title);
+                          }}
+                          className="absolute top-3 right-3 z-10 p-2 rounded-lg bg-white hover:bg-red-50 shadow-md transition-all opacity-0 group-hover:opacity-100"
+                          style={{ color: '#dc2626' }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#fee2e2';
+                            e.target.style.transform = 'scale(1.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'white';
+                            e.target.style.transform = 'scale(1)';
+                          }}
+                          title="Delete document"
+                        >
+                          <FaTrash size={16} />
+                        </button>
+                      )}
 
-                    {/* Icon/Preview */}
-                    <div className="flex items-center justify-center p-8 bg-white bg-opacity-50">
-                      {getFileIcon(doc.file_type)}
-                    </div>
+                      {/* Icon/Preview */}
+                      <div className="flex items-center justify-center p-8 bg-white bg-opacity-50">
+                        {getFileIcon(doc.file_type)}
+                      </div>
 
-                    {/* Document Info */}
-                    <div className="p-4 bg-white bg-opacity-80">
-                      <h3 className="font-semibold text-gray-800 mb-2 truncate" title={doc.doc_title}>
-                        {doc.doc_title}
-                      </h3>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">{getFileTypeLabel(doc.file_type)}</span>
-                        <div className="flex items-center gap-2 text-gray-400 group-hover:text-green-600 transition-colors">
-                          <FaEye size={16} />
-                          <span>View</span>
+                      {/* Document Info */}
+                      <div className="p-4 bg-white bg-opacity-80">
+                        <h3 className="font-semibold text-gray-800 mb-2 truncate" title={doc.doc_title}>
+                          {doc.doc_title}
+                        </h3>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">{getFileTypeLabel(doc.file_type)}</span>
+                          <div className="flex items-center gap-2 text-gray-400 group-hover:text-green-600 transition-colors">
+                            <FaEye size={16} />
+                            <span>View</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
 
             {/* List View */}
             {viewMode === 'list' && (
               <div className="space-y-3">
-                {docs.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="group cursor-pointer rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border"
-                    style={{
-                      backgroundColor: 'rgba(159, 207, 159, 0.7)',
-                      backdropFilter: 'blur(10px)',
-                      WebkitBackdropFilter: 'blur(10px)',
-                      borderColor: 'rgba(7, 79, 6, 0.2)'
-                    }}
-                    onClick={() => {
-                      if (doc.file_type.includes("pdf") || doc.file_type.startsWith("image")) {
-                        setPreviewId(doc.id);
-                        setDocType(doc.file_type);
-                      }
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#074F06';
-                      e.currentTarget.style.backgroundColor = 'rgba(159, 207, 159, 0.9)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(7, 79, 6, 0.2)';
-                      e.currentTarget.style.backgroundColor = 'rgba(159, 207, 159, 0.7)';
-                    }}
-                  >
-                    <div className="flex items-center gap-4 p-4">
-                      <div className="flex-shrink-0">
-                        {getFileIcon(doc.file_type)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-800 truncate">{doc.doc_title}</h3>
-                        <p className="text-sm text-gray-600">{getFileTypeLabel(doc.file_type)}</p>
-                      </div>
-                      <div className="flex items-center gap-3 text-gray-400 group-hover:text-green-600 transition-colors">
-                        <FaEye size={20} />
-                        <span className="font-medium">View</span>
+                {docs
+                  .filter(doc => {
+                    if (activeFilter === 'pdf') return doc.file_type?.includes('pdf');
+                    if (activeFilter === 'image') return doc.file_type?.startsWith('image');
+                    return true;
+                  })
+                  .map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="group cursor-pointer rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border"
+                      style={{
+                        backgroundColor: 'rgba(159, 207, 159, 0.7)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        borderColor: 'rgba(7, 79, 6, 0.2)'
+                      }}
+                      onClick={() => {
+                        if (doc.file_type.includes("pdf") || doc.file_type.startsWith("image")) {
+                          setPreviewId(doc.id);
+                          setDocType(doc.file_type);
+                        }
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#074F06';
+                        e.currentTarget.style.backgroundColor = 'rgba(159, 207, 159, 0.9)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(7, 79, 6, 0.2)';
+                        e.currentTarget.style.backgroundColor = 'rgba(159, 207, 159, 0.7)';
+                      }}
+                    >
+                      <div className="flex items-center gap-4 p-4">
+                        <div className="flex-shrink-0">
+                          {getFileIcon(doc.file_type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-800 truncate">{doc.doc_title}</h3>
+                          <p className="text-sm text-gray-600">{getFileTypeLabel(doc.file_type)}</p>
+                        </div>
+                        <div className="flex items-center gap-3 text-gray-400 group-hover:text-green-600 transition-colors">
+                          <FaEye size={20} />
+                          <span className="font-medium">View</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </>

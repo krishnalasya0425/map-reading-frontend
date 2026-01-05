@@ -168,8 +168,10 @@ const StudentDetails = () => {
                             </h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-white bg-opacity-50 p-3 rounded-xl border border-white">
-                                    <p className="text-[10px] uppercase font-bold text-gray-500">Tests</p>
-                                    <p className="text-xl font-bold text-[#074F06]">{tests.length}</p>
+                                    <p className="text-[10px] uppercase font-bold text-gray-500">Tests Completed</p>
+                                    <p className="text-xl font-bold text-[#074F06]">
+                                        {tests.filter(t => t.score !== null).length} / {tests.length}
+                                    </p>
                                 </div>
                                 <div className="bg-white bg-opacity-50 p-3 rounded-xl border border-white">
                                     <p className="text-[10px] uppercase font-bold text-gray-500">Classes</p>
@@ -205,7 +207,7 @@ const StudentDetails = () => {
                                             <div className="flex items-start justify-between">
                                                 <div>
                                                     <h4 className="font-bold text-lg text-gray-800 group-hover:text-[#074F06] transition-colors">{cls.class_name}</h4>
-                                                    <p className="text-sm text-gray-400 mt-1 uppercase font-bold tracking-tighter">ID: {cls.id}</p>
+
                                                 </div>
                                                 <div className="p-2 bg-green-50 rounded-lg text-[#074F06]">
                                                     <FiArrowRight />

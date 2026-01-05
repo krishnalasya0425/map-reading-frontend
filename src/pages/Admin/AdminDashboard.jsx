@@ -177,7 +177,7 @@ export default function AdminDashboard() {
 
   const startEdit = async (u) => {
     setEditingUser(u);
-    setForm({ ...u, password: "", class_id: u.class_id || "" });
+    setForm({ ...u, class_id: u.class_id || "" });
 
     // Fetch all classes if editing a student
     if (u.role === "student" || filter === "student") {

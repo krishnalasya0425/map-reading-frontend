@@ -86,45 +86,45 @@ export default function StudentDashboard() {
   return (
     <div className="h-full overflow-auto bg-gradient-to-br from-green-50 to-green-100">
       {/* Header Section */}
-      <div className="bg-white shadow-sm border-b border-gray-200 px-8 py-6">
+      <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2" style={{ color: '#074F06' }}>
+            <h1 className="text-xl font-bold mb-1" style={{ color: '#074F06' }}>
               Welcome back, {studentName}!
             </h1>
-            <p className="text-gray-600">
+            <p className="text-xs text-gray-500">
               Continue your map reading training journey
             </p>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="text-center px-6 py-3 rounded-lg" style={{ backgroundColor: '#D5F2D5' }}>
-              <div className="text-2xl font-bold" style={{ color: '#074F06' }}>
+          <div className="flex items-center gap-4">
+            <div className="text-center px-4 py-1.5 rounded-lg" style={{ backgroundColor: '#D5F2D5' }}>
+              <div className="text-lg font-bold" style={{ color: '#074F06' }}>
                 {classes.length}
               </div>
-              <div className="text-sm text-gray-700">Enrolled Classes</div>
+              <div className="text-[10px] uppercase font-bold text-gray-700">Enrolled Classes</div>
             </div>
-            <div className="text-center px-6 py-3 rounded-lg" style={{ backgroundColor: '#D5F2D5' }}>
-              <div className="text-2xl font-bold" style={{ color: '#074F06' }}>
-                {tests.filter(t => t.status === "completed").length}
+            <div className="text-center px-4 py-1.5 rounded-lg" style={{ backgroundColor: '#D5F2D5' }}>
+              <div className="text-lg font-bold" style={{ color: '#074F06' }}>
+                {tests.filter(t => t.status === "completed").length} / {tests.length}
               </div>
-              <div className="text-sm text-gray-700">Tests Completed</div>
+              <div className="text-[10px] uppercase font-bold text-gray-700">Tests Completed</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content - Split View */}
-      <div className="p-8">
+      <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
           {/* LEFT SIDE - CLASSES */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold flex items-center gap-2" style={{ color: '#074F06' }}>
-                <FiBook size={28} />
+              <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: '#074F06' }}>
+                <FiBook size={20} />
                 My Classes
               </h2>
-              <span className="px-3 py-1 rounded-full text-sm font-semibold" style={{ backgroundColor: '#D5F2D5', color: '#074F06' }}>
+              <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#D5F2D5', color: '#074F06' }}>
                 {classes.length} {classes.length === 1 ? 'class' : 'classes'}
               </span>
             </div>
@@ -147,17 +147,17 @@ export default function StudentDashboard() {
                     className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-200 overflow-hidden border border-gray-200 cursor-pointer group"
                     onClick={() => handleClassClick(cls.id)}
                   >
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-4">
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
                           <div
-                            className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md"
+                            className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-md"
                             style={{ backgroundColor: '#074F06' }}
                           >
                             {index + 1}
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-gray-800 transition-colors"
+                            <h3 className="text-base font-bold text-gray-800 transition-colors"
                               style={{
                                 color: 'inherit',
                               }}
@@ -166,10 +166,7 @@ export default function StudentDashboard() {
                             >
                               {cls.class_name}
                             </h3>
-                            <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                              <FiUsers size={14} />
-                              Class ID: {cls.id}
-                            </p>
+
                           </div>
                         </div>
                         <FiArrowRight
@@ -189,16 +186,7 @@ export default function StudentDashboard() {
                         />
                       </div>
 
-                      <div className="flex items-center gap-4 text-sm text-gray-600 pt-4 border-t border-gray-100">
-                        <div className="flex items-center gap-1">
-                          <FiFileText size={16} />
-                          <span>View Documents</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <FiBook size={16} />
-                          <span>Study Materials</span>
-                        </div>
-                      </div>
+
                     </div>
 
                     <div
@@ -214,17 +202,17 @@ export default function StudentDashboard() {
           </div>
 
           {/* RIGHT SIDE - TESTS */}
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-2xl font-bold flex items-center gap-2" style={{ color: '#074F06' }}>
-                <FiClipboard size={28} />
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: '#074F06' }}>
+                <FiClipboard size={20} />
                 Available Tests
               </h2>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className="px-3 py-1.5 rounded-lg text-sm font-semibold border-2 outline-none cursor-pointer transition-all"
+                  className="px-2 py-1 rounded-lg text-xs font-semibold border-2 outline-none cursor-pointer transition-all"
                   style={{
                     borderColor: '#074F06',
                     color: '#074F06',
@@ -235,7 +223,7 @@ export default function StudentDashboard() {
                   <option value="completed">Completed</option>
                   <option value="unattempted">Unattempted</option>
                 </select>
-                <span className="px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap" style={{ backgroundColor: '#D5F2D5', color: '#074F06' }}>
+                <span className="px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap" style={{ backgroundColor: '#D5F2D5', color: '#074F06' }}>
                   {tests.filter(t => {
                     if (filter === "completed") return t.status === "completed";
                     if (filter === "unattempted") return t.status !== "completed";
@@ -280,11 +268,11 @@ export default function StudentDashboard() {
                         }`}
                       onClick={() => handleTestClick(test.id, test.test_set_id, test.status)}
                     >
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-4">
+                      <div className="p-4">
+                        <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h3 className="text-xl font-bold text-gray-800 transition-colors"
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="text-base font-bold text-gray-800 transition-colors"
                                 style={{ color: 'inherit' }}
                                 onMouseEnter={(e) => test.status !== "completed" && (e.target.style.color = '#074F06')}
                                 onMouseLeave={(e) => e.target.style.color = 'inherit'}
@@ -292,7 +280,7 @@ export default function StudentDashboard() {
                                 {test.title}
                               </h3>
                               {test.status === "completed" && (
-                                <FiCheckCircle style={{ color: '#074F06' }} size={20} />
+                                <FiCheckCircle style={{ color: '#074F06' }} size={16} />
                               )}
                             </div>
 
