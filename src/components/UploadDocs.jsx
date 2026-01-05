@@ -187,7 +187,7 @@ const UploadDocs = ({ classId, uploadDocs, onClose }) => {
                     Click to upload or drag and drop
                   </p>
                   <p className="text-sm text-gray-500">
-                    PDF, Images, or Videos (Max 50MB)
+                    PDF, Images
                   </p>
                 </div>
               ) : (

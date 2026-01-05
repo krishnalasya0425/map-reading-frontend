@@ -271,7 +271,7 @@ const SyllabusPage = () => {
       <Docs docs={docs} />
 
       <h1 className="text-3xl font-bold mb-4">
-        Syllabus for Class {classId}
+        Syllabus
       </h1>
 
       {/* ADD SYLLABUS */}

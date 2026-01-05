@@ -310,11 +310,7 @@ const Classes = () => {
                     </div>
                   </div>
 
-                  {/* Class Info */}
-                  <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-                    <FiUsers size={16} />
-                    <span>Class ID: {cls.id}</span>
-                  </div>
+
                 </div>
 
                 {/* Card Actions */}
