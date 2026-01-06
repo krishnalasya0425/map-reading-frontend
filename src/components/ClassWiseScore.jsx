@@ -133,7 +133,7 @@ const ClassWiseScore = () => {
               <h1 className="text-xl font-bold" style={{ color: '#074F06' }}>
                 Test Analytics Dashboard
               </h1>
-              <p className="text-xs text-gray-500 mt-0.5">Monitor test performance across sub-test sets</p>
+              <p className="text-xs text-gray-500 mt-0.5">Monitor test performance across sub-sets</p>
             </div>
           </div>
 
@@ -146,7 +146,7 @@ const ClassWiseScore = () => {
               onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
             >
               <FiPlus size={16} />
-              Create Sub-Test
+              Create Sub-Sets
             </button>
 
             <button
@@ -198,7 +198,7 @@ const ClassWiseScore = () => {
           <div>
             <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: '#074F06' }}>
               <FiFileText size={18} />
-              Available Sub-Test Sets
+              Available Sub-Sets
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">{data.total_sets} {data.total_sets === 1 ? 'set' : 'sets'} available</p>
           </div>
@@ -209,7 +209,7 @@ const ClassWiseScore = () => {
             <div className="inline-block p-3 rounded-full mb-3" style={{ backgroundColor: '#D5F2D5' }}>
               <FiFileText size={24} style={{ color: '#074F06' }} />
             </div>
-            <p className="text-sm text-gray-500">No sub-tests generated yet. Create your first sub-test to get started.</p>
+            <p className="text-sm text-gray-500">No sub-sets generated yet. Create your first sub-sets to get started.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
