@@ -123,13 +123,44 @@ const SyllabusPage = () => {
   };
 
   const getFileIcon = (type) => {
-    if (type.startsWith("image/")) return <FaRegImage className="text-5xl text-blue-400" />;
-    if (type === "application/pdf") return <FaFilePdf className="text-5xl text-red-500" />;
-    if (type.includes("presentation")) return <FaFilePowerpoint className="text-5xl text-orange-500" />;
-    if (type.includes("spreadsheet")) return <FaFileExcel className="text-5xl text-green-600" />;
-    if (type.includes("word")) return <FaFileWord className="text-5xl text-blue-600" />;
+    if (!type) return <FaFile className="text-4xl text-gray-500" />;
+    if (type.startsWith("image/")) return <FaRegImage className="text-4xl text-blue-400" />;
+    if (type === "application/pdf") return <FaFilePdf className="text-4xl text-red-500" />;
+    if (type.startsWith("video/")) return <FaVideo className="text-4xl text-purple-400" />;
+    if (type.includes("presentation")) return <FaFilePowerpoint className="text-4xl text-orange-500" />;
+    if (type.includes("spreadsheet")) return <FaFileExcel className="text-4xl text-green-600" />;
+    if (type.includes("word")) return <FaFileWord className="text-4xl text-blue-600" />;
 
-    return <FaFile className="text-5xl text-gray-500" />;
+    return <FaFile className="text-4xl text-gray-500" />;
+  };
+
+  const renderDocPreview = (doc) => {
+    const fileURL = `data:${doc.file_type};base64,${doc.file_data}`;
+
+    if (doc.file_type.startsWith("image/")) {
+      return (
+        <img
+          src={fileURL}
+          alt={doc.doc_title}
+          className="w-full h-full object-cover transition-transform group-hover:scale-110"
+        />
+      );
+    }
+
+    if (doc.file_type.startsWith("video/")) {
+      return (
+        <div className="w-full h-full bg-black flex items-center justify-center relative">
+          <FaVideo className="text-white text-3xl" />
+          <div className="absolute bottom-1 right-1 px-1 rounded bg-black/50 text-[8px] text-white">Video</div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-50">
+        {getFileIcon(doc.file_type)}
+      </div>
+    );
   };
 
 
@@ -198,15 +229,9 @@ const SyllabusPage = () => {
                 onClick={() => openPreview(doc)}
               >
                 {/* Thumbnail */}
-                {doc.file_type.startsWith("image/") ? (
-                  <img
-                    src={fileURL}
-                    alt={doc.doc_title}
-                    className="w-full h-24 object-cover rounded"
-                  />
-                ) : (
-                  <img src={icon} className="w-16 mx-auto" />
-                )}
+                <div className="h-28 overflow-hidden rounded-md border-b mb-2">
+                  {renderDocPreview(doc)}
+                </div>
 
                 {/* File name */}
                 <p className="text-center text-sm mt-2 truncate">{doc.doc_title}</p>

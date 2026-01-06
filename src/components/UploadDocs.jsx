@@ -102,7 +102,7 @@ const UploadDocs = ({ classId, uploadDocs, onClose }) => {
             </div>
             <div>
               <h2 className="text-2xl font-bold" style={{ color: '#074F06' }}>
-                Upload Document
+                Upload 
               </h2>
               <p className="text-sm text-gray-600">Add a new file to this class</p>
             </div>
@@ -151,7 +151,7 @@ const UploadDocs = ({ classId, uploadDocs, onClose }) => {
               onChange={(e) => setDocTitle(e.target.value)}
               className="w-full px-4 py-3 border-2 rounded-lg outline-none transition-all bg-white"
               style={{ borderColor: '#074F06' }}
-              placeholder="Enter a descriptive title..."
+              placeholder="Enter a Title..."
               onFocus={(e) => e.target.style.boxShadow = '0 0 0 3px rgba(7, 79, 6, 0.1)'}
               onBlur={(e) => e.target.style.boxShadow = 'none'}
             />
@@ -235,7 +235,7 @@ const UploadDocs = ({ classId, uploadDocs, onClose }) => {
               ) : (
                 <>
                   <FaUpload size={18} />
-                  Upload Document
+                  Upload 
                 </>
               )}
             </button>

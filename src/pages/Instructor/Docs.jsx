@@ -170,6 +170,89 @@ const Docs = () => {
     return <FaFile size={40} className="text-gray-500" />;
   };
 
+  const renderFileThumbnail = (doc, isSmall = false) => {
+    const token = localStorage.getItem("token");
+    const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+    // Prioritize file_url from backend (direct static link) if available
+    // Otherwise fallback to the streaming endpoint
+    const fileURL = doc.file_url || `${BASE_URL}/classes/docs/file/${doc.id}${token ? `?token=${token}` : ''}`;
+
+    const handleImageError = (e) => {
+      e.target.parentElement.classList.add('bg-gray-100');
+      e.target.style.display = 'none';
+      if (e.target.nextSibling) {
+        e.target.nextSibling.style.display = 'flex';
+      }
+    };
+
+    if (doc.file_type?.startsWith('image')) {
+      return (
+        <div className="w-full h-full relative overflow-hidden flex items-center justify-center bg-black group">
+          <img
+            src={fileURL}
+            alt={doc.doc_title}
+            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:opacity-40"
+            onError={handleImageError}
+          />
+          <div className="hidden absolute inset-0 items-center justify-center bg-gray-50 flex-col gap-2">
+            {getFileIcon(doc.file_type)}
+            <span className="text-[10px] text-gray-400 font-bold uppercase">No Preview</span>
+          </div>
+          {!isSmall && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <FaEye className="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" size={32} />
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (doc.file_type?.startsWith('video')) {
+      return (
+        <div className="w-full h-full relative overflow-hidden bg-black flex items-center justify-center group">
+          <video
+            src={`${fileURL}#t=0,2`}
+            className="w-full h-full object-cover opacity-70 group-hover:opacity-40 transition-all"
+            muted
+            autoPlay
+            loop
+            playsInline
+            onTimeUpdate={(e) => {
+              if (e.target.currentTime >= 2) {
+                e.target.currentTime = 0;
+              }
+            }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-12 h-12 rounded-full bg-white bg-opacity-90 flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110">
+              <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-black border-b-[8px] border-b-transparent ml-1"></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (doc.file_type?.includes('pdf')) {
+      return (
+        <div className={`w-full h-full flex flex-col items-center justify-center bg-[#1a1a1a] group-hover:bg-[#222] transition-colors ${isSmall ? 'gap-0' : 'gap-2'}`}>
+          <div className={`${isSmall ? 'p-1' : 'p-4'} rounded-xl bg-white/5 shadow-inner transition-transform group-hover:scale-110 border border-white/10`}>
+            <FaFilePdf size={isSmall ? 20 : 40} className="text-red-500" />
+          </div>
+          {!isSmall && (
+            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">PDF Document</span>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-[#1a1a1a]">
+        {getFileIcon(doc.file_type)}
+      </div>
+    );
+  };
+
   const getFileTypeLabel = (mime) => {
     if (!mime) return "Unknown";
     if (mime.includes("pdf")) return "PDF Document";
@@ -237,35 +320,25 @@ const Docs = () => {
 
 
 
-  // Launch VR Practice
-  const launchVRPractice = async () => {
+  // Actual backend trigger for VR launch
+  const handleActualLaunch = async () => {
     const instructorId = localStorage.getItem("id");
-
-    // Show loading modal with VR mode
-    setLaunchMode("vr");
-    setShowLaunchModal(true);
-
     try {
       const url = `http://localhost:5000/unity/practice/${classId}/${instructorId}`;
-
-      // Make background API call to trigger VR launch (no browser navigation)
-      const response = await fetch(url, {
+      await fetch(url, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
-
-      const data = await response.json();
-      console.log('VR build launched:', data.message);
-
-      // Keep modal open to show success message
-      // Modal will transition to success state automatically after loading completes
+      console.log('VR build triggered after confirmation');
     } catch (err) {
-      console.error(err);
-      setShowLaunchModal(false);
-      alert("Failed to launch VR build");
+      console.error('Failed to trigger VR build:', err);
     }
+  };
+
+  // Open the launch flow modal
+  const launchVRPractice = () => {
+    setLaunchMode("vr");
+    setShowLaunchModal(true);
   };
 
   return (
@@ -303,80 +376,81 @@ const Docs = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3">
+            {/* Action Buttons Group */}
+            <div className="flex flex-wrap items-center gap-3 md:justify-end">
               {role !== "Student" && (
                 <>
-                  <button
-                    className="flex items-center gap-2 px-5 py-3 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-                    style={{ backgroundColor: '#8B5CF6' }}
-                    onClick={() => navigate(`/${classId}/generatetest`)}
-                  >
-                    <FaMagic size={18} />
-                    <span className="hidden sm:inline">Generate Test</span>
-                  </button>
+                  {/* Management Tools Group */}
+                  <div className="flex items-center p-1 bg-white/40 backdrop-blur-md rounded-xl border border-white/50 shadow-sm">
+                    <button
+                      className="flex items-center gap-2 px-3 py-2 text-white rounded-lg text-xs font-bold transition-all active:scale-95 hover:brightness-110 shadow-sm"
+                      style={{ backgroundColor: '#8B5CF6' }}
+                      onClick={() => navigate(`/${classId}/generatetest`)}
+                    >
+                      <FaMagic size={12} />
+                      <span className="hidden sm:inline">Generate Test</span>
+                    </button>
 
-                  <button
-                    className="flex items-center gap-2 px-5 py-3 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-                    style={{ backgroundColor: '#074F06' }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#053d05'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
-                    onClick={() => setUploadDoc(true)}
-                  >
-                    <FaUpload size={18} />
-                    <span className="hidden sm:inline">Upload</span>
-                  </button>
+                    <div className="w-px h-4 bg-gray-300 mx-1"></div>
 
-                  <button
-                    className="flex items-center gap-2 px-5 py-3 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-                    style={{ backgroundColor: '#074F06' }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#053d05'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
-                    onClick={handleAddStudentsClick}
-                  >
-                    <FaUserPlus size={18} />
-                    <span className="hidden sm:inline">Add Students</span>
-                  </button>
+                    <button
+                      className="flex items-center gap-2 px-3 py-2 text-white rounded-lg text-xs font-bold transition-all active:scale-95 hover:brightness-110 shadow-sm"
+                      style={{ backgroundColor: '#074F06' }}
+                      onClick={() => setUploadDoc(true)}
+                    >
+                      <FaUpload size={12} />
+                      <span className="hidden sm:inline">Upload</span>
+                    </button>
+                  </div>
 
-                  <button
-                    className="flex items-center gap-2 px-5 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-                    style={{ backgroundColor: '#D5F2D5', color: '#074F06' }}
-                    onClick={handleViewStudentsClick}
-                  >
-                    <FaUsers size={18} />
-                    <span className="hidden sm:inline">View Students</span>
-                  </button>
+                  {/* Class Management Group */}
+                  <div className="flex items-center p-1 bg-white/40 backdrop-blur-md rounded-xl border border-white/50 shadow-sm">
+                    <button
+                      className="flex items-center gap-2 px-3 py-2 text-white rounded-lg text-xs font-bold transition-all active:scale-95 hover:brightness-110 shadow-sm"
+                      style={{ backgroundColor: '#056005' }}
+                      onClick={handleAddStudentsClick}
+                    >
+                      <FaUserPlus size={12} />
+                      <span className="hidden sm:inline">Add Students</span>
+                    </button>
+
+                    <div className="w-px h-4 bg-gray-300 mx-1"></div>
+
+                    <button
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all active:scale-95 hover:bg-white/60 shadow-sm text-[#074F06]"
+                      style={{ backgroundColor: '#D5F2D5' }}
+                      onClick={handleViewStudentsClick}
+                    >
+                      <FaUsers size={12} />
+                      <span className="hidden sm:inline">View Students</span>
+                    </button>
+                  </div>
                 </>
               )}
 
+              {/* Simulation/Practice Group */}
+              <div className="flex items-center p-1 bg-white/40 backdrop-blur-md rounded-xl border border-white/50 shadow-sm">
+                <button
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-white text-xs font-bold transition-all active:scale-95 hover:brightness-110 shadow-sm"
+                  style={{ backgroundColor: '#10b981' }}
+                  onClick={launchVRPractice}
+                >
+                  <FaVrCardboard size={12} />
+                  <span className="hidden sm:inline">Practice</span>
+                </button>
 
+                <div className="w-px h-4 bg-gray-300 mx-1"></div>
 
-              {/* VR Practice Button */}
-              <button
-                className="flex items-center gap-2 px-5 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-                style={{ backgroundColor: '#10b981', color: 'white' }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#059669'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#10b981'}
-                onClick={launchVRPractice}
-              >
-                <FaVrCardboard size={18} />
-                <span className="hidden sm:inline">Practice </span>
-              </button>
+                <button
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-white text-xs font-bold transition-all active:scale-95 hover:brightness-110 shadow-sm"
+                  style={{ backgroundColor: '#f59e0b' }}
+                  onClick={launchExercise}
+                >
+                  <FaClipboardList size={12} />
+                  <span className="hidden sm:inline">Exercise</span>
+                </button>
+              </div>
             </div>
-
-        
-            <button
-  className="flex items-center gap-2 px-5 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-  style={{ backgroundColor: '#f59e0b', color: 'white' }}
-  onMouseEnter={(e) => e.target.style.backgroundColor = '#d97706'}
-  onMouseLeave={(e) => e.target.style.backgroundColor = '#f59e0b'}
-  onClick={launchExercise}
->
-  <FaClipboardList size={18} />
-  <span className="hidden sm:inline">Exercise</span>
-</button>
-
-
           </div>
 
           {/* View Mode Toggle and Stats */}
@@ -464,7 +538,7 @@ const Docs = () => {
                 onMouseLeave={(e) => e.target.style.backgroundColor = '#074F06'}
               >
                 <FaUpload size={18} />
-                Upload Document
+                Upload
               </button>
             )}
           </div>
@@ -483,14 +557,7 @@ const Docs = () => {
                   .map((doc) => (
                     <div
                       key={doc.id}
-                      className="group cursor-pointer rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border relative"
-                      style={{
-                        backgroundColor: 'rgba(159, 207, 159, 0.7)',
-                        backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)',
-                        borderColor: 'rgba(7, 79, 6, 0.2)',
-                        boxShadow: '0 8px 32px 0 rgba(7, 79, 6, 0.1)'
-                      }}
+                      className="group cursor-pointer rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-0 relative bg-white"
                       onClick={() => {
                         if (doc.file_type.includes("pdf") || doc.file_type.startsWith("image") || doc.file_type.startsWith("video")) {
                           setPreviewId(doc.id);
@@ -515,39 +582,26 @@ const Docs = () => {
                             e.stopPropagation(); // Prevent card click
                             handleDeleteDoc(doc.id, doc.doc_title);
                           }}
-                          className="absolute top-3 right-3 z-10 p-2 rounded-lg bg-white hover:bg-red-50 shadow-md transition-all opacity-0 group-hover:opacity-100"
-                          style={{ color: '#dc2626' }}
-                          onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = '#fee2e2';
-                            e.target.style.transform = 'scale(1.1)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = 'white';
-                            e.target.style.transform = 'scale(1)';
-                          }}
+                          className="absolute top-2 right-2 z-10 p-2.5 rounded-lg bg-red-600 text-white shadow-lg transition-all opacity-0 group-hover:opacity-100 hover:bg-red-700 hover:scale-110 border border-white/20"
                           title="Delete document"
                         >
-                          <FaTrash size={16} />
+                          <FaTrash size={14} />
                         </button>
                       )}
 
                       {/* Icon/Preview */}
-                      <div className="flex items-center justify-center p-8 bg-white bg-opacity-50">
-                        {getFileIcon(doc.file_type)}
+                      <div className="h-48 flex items-center justify-center bg-white bg-opacity-50 overflow-hidden">
+                        {renderFileThumbnail(doc)}
                       </div>
 
                       {/* Document Info */}
-                      <div className="p-4 bg-white bg-opacity-80">
-                        <h3 className="font-semibold text-gray-800 mb-2 truncate" title={doc.doc_title}>
+                      <div className="p-5 bg-white flex flex-col gap-1">
+                        <h3 className="font-bold text-[#1a1a1a] text-lg leading-tight truncate" title={doc.doc_title}>
                           {doc.doc_title}
                         </h3>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">{getFileTypeLabel(doc.file_type)}</span>
-                          <div className="flex items-center gap-2 text-gray-400 group-hover:text-green-600 transition-colors">
-                            <FaEye size={16} />
-                            <span>View</span>
-                          </div>
-                        </div>
+                        <p className="text-sm font-semibold text-gray-500">
+                          {getFileTypeLabel(doc.file_type)}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -590,17 +644,14 @@ const Docs = () => {
                       }}
                     >
                       <div className="flex items-center gap-4 p-4">
-                        <div className="flex-shrink-0">
-                          {getFileIcon(doc.file_type)}
+                        <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border bg-white flex items-center justify-center">
+                          {renderFileThumbnail(doc, true)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-gray-800 truncate">{doc.doc_title}</h3>
                           <p className="text-sm text-gray-600">{getFileTypeLabel(doc.file_type)}</p>
                         </div>
-                        <div className="flex items-center gap-3 text-gray-400 group-hover:text-green-600 transition-colors">
-                          <FaEye size={20} />
-                          <span className="font-medium">View</span>
-                        </div>
+
                       </div>
                     </div>
                   ))}
@@ -611,7 +662,12 @@ const Docs = () => {
 
         {/* Preview Modal */}
         {previewId && (
-          <Modal fileId={previewId} docType={docType} onClose={() => setPreviewId(null)} />
+          <Modal
+            fileId={previewId}
+            docType={docType}
+            fileData={docs.find(d => d.id === previewId)?.file_data}
+            onClose={() => setPreviewId(null)}
+          />
         )}
 
         {/* Upload Modal */}
@@ -912,6 +968,7 @@ const Docs = () => {
         <LaunchingAnimation
           isOpen={showLaunchModal}
           onClose={() => setShowLaunchModal(false)}
+          onConfirm={launchMode === 'vr' ? handleActualLaunch : null}
           mode={launchMode}
         />
       </div>

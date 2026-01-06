@@ -1,140 +1,163 @@
+
+
 import React, { useState, useEffect } from "react";
 import { FiX, FiCheck, FiCheckCircle } from "react-icons/fi";
+import { FaVrCardboard } from "react-icons/fa";
 
-const LaunchingAnimation = ({ isOpen, onClose, mode = "practice" }) => {
+const LaunchingAnimation = ({ isOpen, onClose, onConfirm, mode = "practice" }) => {
 
     // Stages: animation -> readiness -> success (for VR mode)
     // Stages: loading -> success (for practice mode)
     const [stage, setStage] = useState("animation");
-    const [animationEnded, setAnimationEnded] = useState(false);
+    const [animationComplete, setAnimationComplete] = useState(false);
+    const [checklist, setChecklist] = useState({
+        connected: false,
+        powered: false,
+        clear: false,
+        paired: false
+    });
 
-   useEffect(() => {
-    if (!isOpen) {
-        setStage(mode === "vr" ? "animation" : "loading");
-        setAnimationEnded(false);
-        return;
-    }
+    useEffect(() => {
+        if (!isOpen) {
+            setStage("animation");
+            setAnimationComplete(false);
+            return;
+        }
 
-    if (mode === "vr") {
-        setStage("animation");
-    } else {
-        setStage("loading");
-        const timer = setTimeout(() => {
-            setStage("success");
-        }, 2000);
-        return () => clearTimeout(timer);
-    }
-}, [isOpen, mode]);
-
+        if (mode !== "vr") {
+            setStage("loading");
+            const timer = setTimeout(() => {
+                setStage("success");
+            }, 3000);
+            return () => clearTimeout(timer);
+        } else {
+            setStage("animation");
+            // Reliability Fallback: Ensure animation completes even if transition event fails
+            const timer = setTimeout(() => {
+                setAnimationComplete(true);
+            }, 5500); // slightly longer than the 5s transition
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen, mode]);
 
     const handleAnimationEnd = () => {
-        setAnimationEnded(true);
-        // Transition to readiness screen after animation ends
-        setTimeout(() => {
+        setAnimationComplete(true);
+        // Stage transition is NOT automatic. We wait for animation to end.
+    };
+
+    const proceedToReadiness = () => {
+        if (animationComplete || mode !== 'vr') {
             setStage("readiness");
-        }, 300);
+        }
     };
 
     const handleReadinessNext = () => {
-        // Transition to success screen
         setStage("success");
     };
+
+    const handleFinalConfirm = () => {
+        if (onConfirm) {
+            onConfirm();
+        }
+        onClose();
+    };
+
+    const toggleCheck = (item) => {
+        setChecklist(prev => ({ ...prev, [item]: !prev[item] }));
+    };
+
+    const allChecked = Object.values(checklist).every(val => val === true);
 
     if (!isOpen) return null;
 
     const title =
-    mode === "vr"
-        ? "VR Practice"
-        : mode === "exercise"
-        ? "Exercise"
-        : "Practice";
+        mode === "vr"
+            ? "VR Practice"
+            : mode === "exercise"
+                ? "Exercise"
+                : "Practice";
 
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-fadeIn">
-            <div className="bg-white rounded-2xl shadow-2xl w-[650px] relative overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[480px] relative overflow-hidden">
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
+                    className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors z-10"
                     aria-label="Close"
                 >
-                    <FiX size={24} />
+                    <FiX size={20} />
                 </button>
 
                 {/* Content */}
-                <div className={mode === "vr" && stage === "animation" ? "p-0" : "p-8"}>
+                <div className={mode === "vr" && stage === "animation" ? "p-0" : "p-6"}>
                     {/* ========================================
                         VR MODE: ANIMATION STAGE
                     ======================================== */}
+                    {/* VR MODE: ANIMATION STAGE (Intro Animation) */}
                     {mode === "vr" && stage === "animation" && (
-                        <div className="relative w-full h-[450px] bg-black flex items-center justify-center overflow-hidden">
-                            {/* Professional AR/VR Animation */}
-                            <div className="vr-animation-container">
-                                {/* Animated Grid Background */}
-                                <div className="vr-grid"></div>
+                        <div className="relative w-full h-[500px] bg-black flex flex-col items-center justify-center overflow-hidden">
+                            {/* Professional Intro Animation Container */}
+                            <div className="vr-intro-container w-full h-full relative">
+                                {/* Grid & Glow Effects */}
+                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/40 via-black to-black"></div>
+                                <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
 
-                                {/* Floating Holographic Elements */}
-                                <div className="vr-hologram vr-hologram-1"></div>
-                                <div className="vr-hologram vr-hologram-2"></div>
-                                <div className="vr-hologram vr-hologram-3"></div>
-
-                                {/* Additional depth layers */}
-                                <div className="vr-depth-layer vr-depth-1"></div>
-                                <div className="vr-depth-layer vr-depth-2"></div>
-
-                                {/* Particles */}
-                                <div className="vr-particles">
-                                    {[...Array(25)].map((_, i) => (
-                                        <div key={i} className="vr-particle" style={{
-                                            left: `${Math.random() * 100}%`,
-                                            animationDelay: `${Math.random() * 4}s`,
-                                            animationDuration: `${3 + Math.random() * 3}s`
-                                        }}></div>
-                                    ))}
+                                {/* CSS Animation Layers */}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-64 h-64 border-2 border-cyan-500/30 rounded-full animate-ping duration-[3000ms]"></div>
+                                    <div className="absolute w-48 h-48 border border-white/20 rounded-full animate-reverse-spin duration-[5000ms]"></div>
                                 </div>
 
-                                {/* Center VR Icon with pulse */}
-                                <div className="vr-center-icon">
-                                    <svg
-                                        className="w-28 h-28 text-cyan-400 vr-icon-pulse"
-                                        fill="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path d="M20.74 6H3.26C2.01 6 1 7.01 1 8.26v7.48C1 16.99 2.01 18 3.26 18h4.59l2.1 2.1c.58.58 1.52.58 2.1 0l2.1-2.1h4.59c1.25 0 2.26-1.01 2.26-2.26V8.26C23 7.01 21.99 6 20.74 6zM7.5 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm9 0c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
-                                    </svg>
-                                </div>
-
-                                {/* Holographic UI Elements */}
-                                <div className="vr-ui-overlay">
-                                    <div className="vr-ui-corner vr-ui-top-left"></div>
-                                    <div className="vr-ui-corner vr-ui-top-right"></div>
-                                    <div className="vr-ui-corner vr-ui-bottom-left"></div>
-                                    <div className="vr-ui-corner vr-ui-bottom-right"></div>
-                                </div>
-
-                                {/* Professional Loading Text */}
-                                <div className="vr-loading-text">
-                                    <p className="text-cyan-400 text-2xl font-bold tracking-widest vr-text-glow">
-                                        INITIALIZING VR ENVIRONMENT
-                                    </p>
-                                    <div className="vr-progress-dots">
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
+                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-12 text-center">
+                                    <div className="mb-8 relative">
+                                        <div className="w-32 h-32 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-3xl rotate-12 animate-float shadow-[0_0_50px_rgba(6,182,212,0.5)] flex items-center justify-center border border-white/20">
+                                            <FaVrCardboard size={64} className="text-white -rotate-12" />
+                                        </div>
+                                        <div className="absolute -inset-4 bg-cyan-400/20 blur-2xl rounded-full animate-pulse"></div>
                                     </div>
+
+                                    <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-blue-400 mb-4 tracking-[0.2em] uppercase italic">
+                                        Initializing VR
+                                    </h1>
+
+                                    <div className="w-64 h-1.5 bg-white/10 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                                        <div
+                                            className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-[5000ms] ease-linear"
+                                            style={{ width: isOpen ? '100%' : '0%' }}
+                                            onTransitionEnd={handleAnimationEnd}
+                                        ></div>
+                                    </div>
+
+                                    <p className="mt-6 text-cyan-300/60 font-mono text-[10px] tracking-widest uppercase animate-pulse">
+                                        Mapping Environment & Sensors
+                                    </p>
                                 </div>
+
+                                {/* Floating HUD Elements */}
+                                <div className="absolute top-10 left-10 border-l border-t border-cyan-500/50 w-20 h-20 opacity-40"></div>
+                                <div className="absolute bottom-10 right-10 border-r border-b border-cyan-500/50 w-20 h-20 opacity-40"></div>
                             </div>
 
-                            {/* Auto-advance after animation duration (30 seconds) */}
-                            <div
-                                className="hidden"
-                                ref={(el) => {
-                                    if (el && !animationEnded) {
-                                        setTimeout(handleAnimationEnd, 10000); // 30 second professional animation
-                                    }
-                                }}
-                            ></div>
+                            {/* Proceed Button (Only visible when animation ends) */}
+                            {animationComplete ? (
+                                <div className="absolute bottom-10 left-0 right-0 px-10 animate-bounceIn z-50">
+                                    <button
+                                        onClick={proceedToReadiness}
+                                        className="w-full py-4 bg-white text-black font-black uppercase tracking-widest rounded-xl shadow-[0_10px_40px_rgba(255,255,255,0.4)] hover:bg-cyan-50 transition-all active:scale-95 border-2 border-cyan-400"
+                                    >
+                                        Enter Readiness Console
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setAnimationComplete(true)}
+                                    className="absolute bottom-4 text-white/30 hover:text-white/60 text-[9px] uppercase tracking-[0.3em] transition-colors"
+                                >
+                                    Skip Intro (Dev)
+                                </button>
+                            )}
                         </div>
                     )}
 
@@ -144,10 +167,11 @@ const LaunchingAnimation = ({ isOpen, onClose, mode = "practice" }) => {
                     {mode === "vr" && stage === "readiness" && (
                         <div className="text-center animate-fadeIn">
                             {/* VR Headset Icon */}
-                            <div className="mb-6 flex justify-center">
-                                <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                            <div className="mb-4 flex justify-center">
+                                <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center border border-green-100 shadow-sm">
                                     <svg
-                                        className="w-14 h-14 text-blue-600"
+                                        className="w-10 h-10"
+                                        style={{ color: '#074F06' }}
                                         fill="currentColor"
                                         viewBox="0 0 24 24"
                                     >
@@ -157,47 +181,96 @@ const LaunchingAnimation = ({ isOpen, onClose, mode = "practice" }) => {
                             </div>
 
                             {/* Title */}
-                            <h2 className="text-2xl font-bold text-gray-800 mb-3">
+                            <h2 className="text-lg font-bold text-gray-800 mb-2">
                                 Are you ready to start VR Practice?
                             </h2>
 
                             {/* Informational Text */}
-                            <p className="text-gray-600 text-base mb-6 leading-relaxed max-w-md mx-auto">
-                                Please ensure your VR headset is connected, powered on, and ready for use before starting the practice session.
+                            <p className="text-gray-500 text-[13px] mb-4 leading-relaxed max-w-[320px] mx-auto">
+                                Please ensure your VR headset is connected and powered on before starting.
                             </p>
 
                             {/* Checklist */}
-                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-5 mb-6 text-left max-w-md mx-auto">
-                                <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                            <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 mb-4 text-left">
+                                <h3 className="text-[10px] font-black text-gray-400 mb-3 uppercase tracking-widest text-center">
                                     Pre-Launch Checklist
                                 </h3>
-                                <div className="space-y-3">
-                                    <div className="flex items-start gap-3">
-                                        <FiCheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                        <span className="text-sm text-gray-700">VR headset is connected to your PC</span>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <FiCheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                        <span className="text-sm text-gray-700">Headset is powered on and functional</span>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <FiCheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                        <span className="text-sm text-gray-700">Play area is clear and safe</span>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <FiCheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                        <span className="text-sm text-gray-700">Controllers are charged and paired</span>
-                                    </div>
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-white transition-all cursor-pointer group border border-transparent hover:border-gray-100 shadow-sm hover:shadow-md">
+                                        <div className="relative flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={checklist.connected}
+                                                onChange={() => toggleCheck('connected')}
+                                                className="w-5 h-5 rounded-md border-2 border-gray-200 checked:bg-[#074F06] checked:border-[#074F06] transition-all appearance-none cursor-pointer"
+                                            />
+                                            {checklist.connected && <FiCheck className="absolute left-0.5 text-white pointer-events-none" size={14} strokeWidth={4} />}
+                                        </div>
+                                        <span className={`text-[12px] font-bold transition-colors ${checklist.connected ? 'text-gray-800' : 'text-gray-400'}`}>
+                                            VR headset is connected to your PC
+                                        </span>
+                                    </label>
+
+                                    <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-white transition-all cursor-pointer group border border-transparent hover:border-gray-100 shadow-sm hover:shadow-md">
+                                        <div className="relative flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={checklist.powered}
+                                                onChange={() => toggleCheck('powered')}
+                                                className="w-5 h-5 rounded-md border-2 border-gray-200 checked:bg-[#074F06] checked:border-[#074F06] transition-all appearance-none cursor-pointer"
+                                            />
+                                            {checklist.powered && <FiCheck className="absolute left-0.5 text-white pointer-events-none" size={14} strokeWidth={4} />}
+                                        </div>
+                                        <span className={`text-[12px] font-bold transition-colors ${checklist.powered ? 'text-gray-800' : 'text-gray-400'}`}>
+                                            Headset is powered on and functional
+                                        </span>
+                                    </label>
+
+                                    <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-white transition-all cursor-pointer group border border-transparent hover:border-gray-100 shadow-sm hover:shadow-md">
+                                        <div className="relative flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={checklist.clear}
+                                                onChange={() => toggleCheck('clear')}
+                                                className="w-5 h-5 rounded-md border-2 border-gray-200 checked:bg-[#074F06] checked:border-[#074F06] transition-all appearance-none cursor-pointer"
+                                            />
+                                            {checklist.clear && <FiCheck className="absolute left-0.5 text-white pointer-events-none" size={14} strokeWidth={4} />}
+                                        </div>
+                                        <span className={`text-[12px] font-bold transition-colors ${checklist.clear ? 'text-gray-800' : 'text-gray-400'}`}>
+                                            Play area is clear and safe
+                                        </span>
+                                    </label>
+
+                                    <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-white transition-all cursor-pointer group border border-transparent hover:border-gray-100 shadow-sm hover:shadow-md">
+                                        <div className="relative flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={checklist.paired}
+                                                onChange={() => toggleCheck('paired')}
+                                                className="w-5 h-5 rounded-md border-2 border-gray-200 checked:bg-[#074F06] checked:border-[#074F06] transition-all appearance-none cursor-pointer"
+                                            />
+                                            {checklist.paired && <FiCheck className="absolute left-0.5 text-white pointer-events-none" size={14} strokeWidth={4} />}
+                                        </div>
+                                        <span className={`text-[12px] font-bold transition-colors ${checklist.paired ? 'text-gray-800' : 'text-gray-400'}`}>
+                                            Controllers are charged and paired
+                                        </span>
+                                    </label>
                                 </div>
                             </div>
 
-                            {/* Next Button */}
-                            <button
-                                onClick={handleReadinessNext}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 px-6 rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                            >
-                                Next
-                            </button>
+                            {/* Next Button - Always visible, enabled state depends on checklist */}
+                            <div className="mt-6">
+                                <button
+                                    onClick={allChecked ? handleReadinessNext : null}
+                                    disabled={!allChecked}
+                                    className={`w-full font-bold py-3 px-6 rounded-xl transition-all shadow-md transform ${allChecked
+                                        ? 'bg-[#074F06] text-white hover:shadow-xl hover:scale-[1.02] cursor-pointer'
+                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        }`}
+                                >
+                                    Proceed to Launch
+                                </button>
+                            </div>
                         </div>
                     )}
 
@@ -205,37 +278,17 @@ const LaunchingAnimation = ({ isOpen, onClose, mode = "practice" }) => {
                         PRACTICE MODE: LOADING STAGE
                     ======================================== */}
                     {mode === "practice" && stage === "loading" && (
-                        <div className="text-center">
-                            <div className="mb-6 flex justify-center">
+                        <div className="text-center py-4">
+                            <div className="mb-4 flex justify-center">
                                 <div className="relative">
-                                    <div className="w-24 h-24 border-4 border-blue-200 rounded-full animate-spin-slow"></div>
-                                    <div className="absolute inset-0 w-24 h-24 border-4 border-transparent border-t-blue-600 rounded-full animate-spin"></div>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <svg
-                                            className="w-10 h-10 text-blue-600"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                            />
-                                        </svg>
-                                    </div>
+                                    <div className="w-16 h-16 border-2 border-green-50 rounded-full animate-spin-slow"></div>
+                                    <div className="absolute inset-0 w-16 h-16 border-2 border-transparent border-t-[#074F06] rounded-full animate-spin"></div>
                                 </div>
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-    {mode === "vr" && "Launching VR Practice"}
-    {mode === "practice" && "Launching Practice"}
-    {mode === "exercise" && "Launching Exercise"}
-</h2>
-
-                            <p className="text-gray-600 mb-6">
-                                Preparing your session...
-                            </p>
+                            <h2 className="text-lg font-bold text-gray-800 mb-1">
+                                {mode === "vr" ? "Launching VR..." : "Launching..."}
+                            </h2>
+                            <p className="text-gray-400 text-[12px]">Preparing your session...</p>
                         </div>
                     )}
 
@@ -245,49 +298,35 @@ const LaunchingAnimation = ({ isOpen, onClose, mode = "practice" }) => {
                     {stage === "success" && (
                         <div className="text-center animate-fadeIn">
                             {/* Success Icon */}
-                            <div className="mb-6 flex justify-center">
+                            <div className="mb-4 flex justify-center">
                                 <div className="relative">
-                                    <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center animate-scale-in">
-                                        <FiCheck className="w-12 h-12 text-green-600" strokeWidth={3} />
+                                    <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center animate-scale-in border border-green-100 shadow-sm">
+                                        <FiCheck className="w-8 h-8 text-green-600" strokeWidth={3} />
                                     </div>
-                                    <div className="absolute inset-0 w-24 h-24 border-4 border-green-300 rounded-full animate-ping-slow"></div>
+                                    <div className="absolute inset-0 w-16 h-16 border-2 border-green-200 rounded-full animate-ping-slow"></div>
                                 </div>
                             </div>
 
-                            {/* Success Title */}
-                            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-    {mode === "vr" && "VR Practice Launched Successfully!"}
-    {mode === "practice" && "Practice Launched Successfully!"}
-    {mode === "exercise" && "Exercise Launched Successfully!"}
-</h2>
-<p className="font-medium">
-    {mode === "vr" && "VR application is now running"}
-    {mode === "practice" && "Practice session is now running"}
-    {mode === "exercise" && "Exercise session is now running"}
-</p>
+                            {/* Title */}
+                            <h2 className="text-2xl font-black text-gray-800 mb-1">
+                                VR Practice Launched!
+                            </h2>
 
-
-                            {/* Success Message */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                                <div className="flex items-center justify-center gap-2 text-blue-700">
-                                    <FiCheck className="w-5 h-5" />
-                                    <p className="font-medium">
-                                        {mode === "vr"
-                                            ? "VR application is now running"
-                                            : "Practice session is now running"}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Instructions - MANDATORY MESSAGE */}
-                            <p className="text-gray-600 text-sm mb-6">
-                                The practice application should now be visible on your desktop.
+                            <p className="text-[#074F06] font-bold text-sm mb-6">
+                                VR application is now active
                             </p>
 
-                            {/* Close Button */}
+                            {/* Mandatory Message */}
+                            <div className="bg-amber-50 border-2 border-amber-100 rounded-2xl p-5 mb-8">
+                                <p className="text-amber-900 font-bold text-sm leading-relaxed">
+                                    The practice application will open on your desktop after confirmation.
+                                </p>
+                            </div>
+
+                            {/* Final Launch Button */}
                             <button
-                                onClick={onClose}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-lg"
+                                onClick={handleFinalConfirm}
+                                className="w-full bg-[#074F06] text-white font-black py-4 px-8 rounded-2xl transition-all shadow-xl hover:shadow-[0_15px_40px_rgba(7,79,6,0.4)] hover:scale-[1.02] active:scale-95 text-lg"
                             >
                                 Got it!
                             </button>
@@ -296,7 +335,7 @@ const LaunchingAnimation = ({ isOpen, onClose, mode = "practice" }) => {
                 </div>
 
                 {/* Decorative gradient bar at bottom */}
-                <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+                <div className="h-1 bg-gradient-to-r from-green-600 via-green-800 to-green-900"></div>
             </div>
         </div>
     );

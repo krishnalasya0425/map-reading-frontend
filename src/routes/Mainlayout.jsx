@@ -31,9 +31,11 @@ export default function MainLayout() {
     return <Navigate to="/" replace />;
   }
 
+  const isTestPage = location.pathname.endsWith('/questions');
+
   return (
     <div className="w-screen h-screen flex flex-col text-black overflow-hidden bg-gradient-to-br from-green-50 to-green-100">
-      <Header role={role} />
+      {!isTestPage && <Header role={role} />}
       <div className="flex-grow overflow-auto bg-gradient-to-br from-green-50 to-green-100">
         {routes}
       </div>
