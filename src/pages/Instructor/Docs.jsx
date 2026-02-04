@@ -85,9 +85,9 @@ const Docs = () => {
 
   useEffect(() => {
     loadDocs();
+    loadUnityBuilds(); // Load Unity builds for all users (students need this to enable Practice button)
     if (role !== "Student") {
       loadClassStudents();
-      loadUnityBuilds();
     }
   }, [classId, uploadDoc]);
 
